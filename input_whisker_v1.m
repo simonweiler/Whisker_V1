@@ -44,6 +44,7 @@ clean_arrays(find(sum(ord_arrays>0,2)<2),:)=0
 %Plotting
 exc_map=reshape(nanmean(clean_arrays,2),16,8);
 
+if sum(exc_map(:))>0
 F = figure;
 set(gcf,'color','w');
 set(F, 'Name', 'Correlation pial depth');
@@ -56,5 +57,31 @@ explot_type = 2;
 header.mapper.mapper.soma1Coordinates
 map_plot_wV1(exc_map,'',explot_type,F,sf,0,1,header.mapper.mapper.soma1Coordinates);
 hold on; title(tit);
+
+else
+%% empty matrix
+F = figure;
+set(gcf,'color','w');
+set(F, 'Name', 'Correlation pial depth');
+set(F, 'Position', [200, 200, 180, 230]);
+imagesc(exc_map);colormap(white);
+hold on;
+set(gca,'YTick',[1.1, 4.1, 7.1, 9.6, 12.6, 15.1],'YTickLabels',{'L1','L2/3','L4','L5','L6','WM'},...
+         'TickLength',[0 0],'XTick',[])
+    p1=plot(linspace(0,17,18),2.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
+    p1=plot(linspace(0,17,18),6.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
+    p1=plot(linspace(0,17,18),8.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
+    p1=plot(linspace(0,17,18),11.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
+    p1=plot(linspace(0,17,18),14.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5
+colorbar;
+   x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+  
+    adj_x = ((16*69/2)-header.mapper.mapper.soma1Coordinates(1))*(x_lim(2)-x_lim(1))/(16*69);
+    adj_y =((16*69/2)-header.mapper.mapper.soma1Coordinates(2))*(y_lim(2)-y_lim(1))/(16*69);
+    %plot the center
+    plot(adj_x,adj_y,'^k','MarkerFaceColor','k','MarkerEdgeColor','k','MarkerSize',2);
+    hold on; title(tit);
+end
 out=clean_arrays;
 end
