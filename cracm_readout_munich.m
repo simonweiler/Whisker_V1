@@ -1,93 +1,66 @@
 %Reading out xsg files for cracm experiments with S1 ChR2 and recording in
 %V1 Munich data from 
 %% data storage
+%% single traces c1
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180302iviv\SW0002\'
+c1=ind_xsg(pathName);
 %pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180302iviv\SW0003\map01'
-clear all;
+%% c2 maps
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180302iviv\SW0003\'
+maps={'01';'02'};
+tit='180302SW0003';
+[c2]=input_whisker_v1(pathName,maps,tit);
+%% c3 maps
 pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180302iviv\SW0006\'
 maps={'01';'02';'03'};
+tit='180302SW0006';
+[c3]=input_whisker_v1(pathName,maps,tit);
+%% c4 maps
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180302iviv\SW0007\'
+maps={'01';'02';'03'};
+tit='180302SW0007';
+[c4]=input_whisker_v1(pathName,maps,tit);
+%% c5 maps
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180305iviv\SW0002\'
+maps={'01';'02'};
+tit='180305SW0002';
+[c5]=input_whisker_v1(pathName,maps,tit);
+%% c6 single
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180305iviv\SW0003\'
+c6=ind_xsg(pathName);
+
+%% c7 maps
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180305iviv\SW0004\'
+maps={'03';'04';'05'};
+tit='180305SW0004';
+[c7]=input_whisker_v1(pathName,maps,tit);
+%% c8 maps
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180313iviv\SW0002\'
+maps={'01';'02'};
 tit='180313SW0002';
-[out]=input_whisker_v1(pathName,maps,tit)
-%% Read out individual maps
-for i=1:length(maps)
-list=dir([char(pathName) 'map' maps{i} filesep '*.xsg']);
-
-
-load([char(pathName) 'map' maps{i} filesep list.name],'-mat');
-sr = header.ephys.ephys.sampleRate;%check sample rate
-srF = 1/(1000/sr);
-samples_per_sweep = header.ephys.ephys.traceLength*sr;
-timebase=1/sr:1/sr:samples_per_sweep/sr; %TR2019: timebase
-traces=data.ephys.trace_1;%raw ephys trace
-%Filter
-cutoff      = 1000;     % Hz (use 500 Hz for mini event / amplitude detection and 1000Hz for max currents. Chen & Regehr 2000)
-order       = 4;        % filter order ('pole'). (use 4 pole for minis and max current. Chen & Regehr 2000)
-type        = 'Butter';
-traces = lowpassfilt(traces, order, cutoff, sr, type);
-%ind_traces=reshape(traces,[length(traces)/256 256]);
-ind_traces=reshape(traces,[length(traces)/128 128]);
-base_start=1;
-base_end=100;
-baseline=ind_traces(base_start*srF:base_end*srF,:);
-bs_traces=ind_traces-mean(baseline);%subtract baseline
-std_bs=fac*std(baseline);
-resp_m=max(abs(bs_traces(1000:3000,:)))>std_bs
-for t=1:length(resp_m)
-    if resp_m(t)==1
-    psc(:,t)=max(abs(bs_traces(1000:3000,t)));
-    else resp_m(t)==0;
-        psc(:,t)=0;
-    end
-end
- mapPat=header.mapper.mapper.mapPatternArray;
- array_psc=psc;
-  for n=1:numel(mapPat)
-  newa(:,find(mapPat==n)) = array_psc(:,n);
-  end
-  ord_arrays(:,i)=newa;
-end
-%% multiple repetition criterion
-clean_arrays=ord_arrays;
-clean_arrays(find(sum(ord_arrays>0,2)<2),:)=0
-%Plotting
-exc_map=reshape(nanmean(clean_arrays,2),16,8);
-
-F = figure;
-set(gcf,'color','w');
-set(F, 'Name', 'Correlation pial depth');
-set(F, 'Position', [200, 200, 180, 230]);
-
-sf=10;    
-%define the plot type (2 for excitatory)
-explot_type = 2;
-%get the pial distance
-header.mapper.mapper.soma1Coordinates
-map_plot_wV1(exc_map,'',explot_type,F,sf,0,1,header.mapper.mapper.soma1Coordinates);
-hold on; title(tit);
-%% empty matrix
-F = figure;
-set(gcf,'color','w');
-set(F, 'Name', 'Correlation pial depth');
-set(F, 'Position', [200, 200, 180, 230]);
-imagesc(exc_map);colormap(white);
-hold on;
-set(gca,'YTick',[1.1, 4.1, 7.1, 9.6, 12.6, 15.1],'YTickLabels',{'L1','L2/3','L4','L5','L6','WM'},...
-         'TickLength',[0 0],'XTick',[])
-    p1=plot(linspace(0,17,18),2.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
-    p1=plot(linspace(0,17,18),6.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
-    p1=plot(linspace(0,17,18),8.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
-    p1=plot(linspace(0,17,18),11.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5;
-    p1=plot(linspace(0,17,18),14.1.*ones(1,18),':','Color',[0.5 0.5 0.5]);p1.LineWidth=0.25;p1.Color(4) = 0.5
-colorbar;
-   x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-  
-    adj_x = ((16*69/2)-header.mapper.mapper.soma1Coordinates(1))*(x_lim(2)-x_lim(1))/(16*69);
-    adj_y =((16*69/2)-header.mapper.mapper.soma1Coordinates(2))*(y_lim(2)-y_lim(1))/(16*69);
-    %plot the center
-    plot(adj_x,adj_y,'^k','MarkerFaceColor','k','MarkerEdgeColor','k','MarkerSize',2);
-    hold on; title(tit);
-%% Baseline subtraction
-
+[c8]=input_whisker_v1(pathName,maps,tit);
+%% single traces c9
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180313iviv\SW0003\'
+c9=ind_xsg(pathName);
+%% single traces c9
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180313iviv\SW0004\'
+c10=ind_xsg(pathName);
+%% all together
+all_c=[nanmean(nonzeros(c1));
+nanmean(nonzeros(c2))
+nanmean(nonzeros(c3))
+nanmean(nonzeros(c4))
+nanmean(nonzeros(c5))
+nanmean(nonzeros(c6))
+nanmean(nonzeros(c7))
+nanmean(nonzeros(c8))
+nanmean(nonzeros(c9))
+nanmean(nonzeros(c10))];
+all_c(find(isnan(all_c)))=0;
+f=figure;b=bar(1:10,all_c);b.FaceColor='w';
+xlabel('Cell Number');
+ylabel('Average Synaptic Input (pA)')
+set(f, 'Position', [200, 200, 250, 230])
 %% 
 array=[];
  newArray=[];
@@ -215,8 +188,8 @@ set(findobj(gcf, 'Type', 'axes'), 'Visible', 'off');
 
 
 %% %single traces
-clear all
-pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180302iviv\SW0007\'
+
+pathName='C:\Users\slice setup\SimonW\Whisker_V1\data\180302iviv\SW0002\'
 list=dir([char(pathName) filesep '*.xsg']);
 for i=1:length(list)
   load([char(pathName) filesep list(i).name],'-mat');  
