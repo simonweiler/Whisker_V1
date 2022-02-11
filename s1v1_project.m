@@ -1,5 +1,5 @@
 %% Load data structure for S1 V1
-str   = 'D:\Postdoc_Margrie\Projects\Callosal\output';
+str   = 'D:\Postdoc_Margrie\Projects\Whisker\output_structure';
 folder_list = uipickfiles('FilterSpec',str);
 load(char(folder_list));
 %sampling rate
@@ -7,8 +7,29 @@ srF=20;
 sr=20000;
 %% 
 %% use filter function 'cell selecter' to read out desired cells/line etc.
-%Cs-gluc cells regardless of labeled layer and type as well as no drugs present 
-all_cs = cell_selecter(Ephys,'sol',2,'drugs',0);
+%Paired Cs-gluc cells in L23
+temp1=[];temp2=[];
+for i=1:5
+temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',2,'pair',i);
+temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',2,'pair',i);
+end
+cre_on_cs=sum(temp1);
+cre_off_cs=sum(temp2);
+%% 
+%Paired Cs-gluc cells in L23
+temp1=[];temp2=[];
+for i=1:5
+temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',1,'pair',i);
+temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',1,'pair',i);
+end
+cre_on_k=sum(temp1);
+cre_off_k=sum(temp2);
+
+%% 
+[epsc_on_train ipsc_on_train e_i_ratio_on_train] = readout_amp(Ephys,cre_on_cs ,1);
+[epsc_off_train ipsc_off_train e_i_ratio_off_train] = readout_amp(Ephys,cre_off_cs ,1);
+[epsc_on_traink tr trtt] = readout_amp(Ephys,cre_on_k ,1);
+[epsc_off_traink trr trtttt] = readout_amp(Ephys,cre_off_k ,1);
 %% Read out max epsc and ipsc amplitude for train stimulus, and the two high frequency stimuli
 temp=[];
 for i=1:length(find(all_cs==1));
