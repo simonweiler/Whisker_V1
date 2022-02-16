@@ -5,13 +5,65 @@ load(char(folder_list));
 %sampling rate
 srF=20;
 sr=20000;
-%% 
-%% use filter function 'cell selecter' to read out desired cells/line etc.
-%Paired Cs-gluc cells in L23
+%% get all excitatory cells with EPSC/IPSC L2/3
+temp1=[];
+lv=[0 1];
+for i=1:2
+temp1(i,:)=cell_selecter(Ephys,'label',lv(i),'sol',2,'layer',3);
+end
+pyr_cs=sum(temp1);
+%% Plot example 
+cnr=31 %210914SW0002 (nonlabelled)
+ov_min=-400;ov_max=600;
+temp=[];temp=find(pyr_cs==1);
+fig4=figure;set(fig4, 'Position', [200, 200, 200, 300]);set(gcf,'color','w');
+if max(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2))>max(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1))
+plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','r','LineWidth',1);set(gca,'box','off');
+hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);
+else
+ plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','r','LineWidth',1);set(gca,'box','off');
+hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
+hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+end
+%%  get all cre on/ cre off L2/3 NON PAIRED
+pyr_cs_creon=cell_selecter(Ephys,'label',1,'sol',2,'layer',3);
+pyr_cs_creoff=cell_selecter(Ephys,'label',0,'sol',2,'layer',3);
+%% Cre on vs cre off 
+%CRE ON
+cnr=7;%210907SW001
+ov_min=-150;ov_max=20;
+temp=[];temp=find(pyr_cs_creon==1);
+fig4=figure;set(fig4, 'Position', [200, 200, 400, 200]);set(gcf,'color','w');
+subplot(1,2,1)
+if max(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2))>max(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1))
+plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','r','LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','b','LineWidth',1);set(gca,'box','off');hold on;
+else
+ plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','r','LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
+hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+end
+ylim([ov_min-10 ov_max]);title('Cre+','Color','r');
+
+%CRE OFF
+cnr=4;%210907SW001
+temp=[];temp=find(pyr_cs_creoff==1);
+subplot(1,2,2);
+if max(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2))>max(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1))
+plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','k','LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);
+else
+ plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','k','LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
+hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+end
+ylim([ov_min-10 ov_max]);title('Cre-','Color','k');
+
+%% Cs-gluc cells in L23 PAIRED
 temp1=[];temp2=[];
 for i=1:5
-temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',2,'pair',i);
-temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',2,'pair',i);
+temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',2,'geno',7,'pair',i);
+temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',2,'geno',7,'pair',i);
 end
 cre_on_cs=sum(temp1);
 cre_off_cs=sum(temp2);
@@ -19,64 +71,65 @@ cre_off_cs=sum(temp2);
 %Paired Cs-gluc cells in L23
 temp1=[];temp2=[];
 for i=1:5
-temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',1,'pair',i);
-temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',1,'pair',i);
+temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',1,'geno',7,'pair',i);
+temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',1,'geno',7,'pair',i);
 end
 cre_on_k=sum(temp1);
 cre_off_k=sum(temp2);
+%% 
+
+
+%% use high frequency pulse for this analysis 
+[epsc_on_train ipsc_on_train e_i_ratio_on_train] = readout_amp(Ephys,cre_on_cs ,2);
+[epsc_off_train ipsc_off_train e_i_ratio_off_train] = readout_amp(Ephys,cre_off_cs ,2);
+[epsc_on_traink tr trtt] = readout_amp(Ephys,cre_on_k ,2);
+[epsc_off_traink trr trtttt] = readout_amp(Ephys,cre_off_k ,2);
+
+% %% 
+% edges = [0:0.25:2];
+% fig4=figure;set(fig4, 'Position', [200, 200, 200, 200]);set(gcf,'color','w');
+% h1=histogram(all_eit,edges,'Normalization','probability');h1.FaceColor='k'
+% hold on;h2=histogram(all_eif,edges,'Normalization','probability');h2.FaceColor='g'
+% hold on;h3=histogram(all_eif2,edges,'Normalization','probability');h3.FaceColor='m'
+% box off;xlabel('E/I ratio');ylabel('Relative counts');legend({'1 Hz','25 Hz','50 Hz'});
+% hold on;plot([1 1],[0 0.3],'--k');legend boxoff 
+%% only using pairs
+data=[];data=[[epsc_on_train epsc_on_traink]' [epsc_off_train epsc_off_traink]'];
+paired_plot_box(data);
+data=[];data=[[ipsc_on_train]' [ipsc_off_train]'];
+paired_plot_box(data);
+%% traces for epsc and ipsc for CRE ON and CRE OFF
+%epsc
+temp=[];
+range=6;
+temp=find(cre_on_cs);
+for cnr=1:length(temp)
+if max(Ephys(temp(cnr)).sub_traces_high(1:range*sr,2))>max(Ephys(temp(cnr)).sub_traces_high(1:range*sr,1))
+     traces_epsc_creon(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,1);
+     traces_ipsc_creon(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,2);
+else
+     traces_epsc_creon(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,2);
+     traces_ipsc_creon(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,1);
+end
+end
+%ipsc 
+temp=[];
+range=6;
+temp=find(cre_off_cs);
+for cnr=1:length(temp)
+if max(Ephys(temp(cnr)).sub_traces_high(1:range*sr,2))>max(Ephys(temp(cnr)).sub_traces_high(1:range*sr,1))
+     traces_epsc_creoff(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,1);
+     traces_ipsc_creoff(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,2);
+else
+     traces_epsc_creoff(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,2);
+     traces_ipsc_creoff(:,cnr)=Ephys(temp(cnr)).sub_traces_high(1:range*sr,1);
+end
+end
 
 %% 
-[epsc_on_train ipsc_on_train e_i_ratio_on_train] = readout_amp(Ephys,cre_on_cs ,1);
-[epsc_off_train ipsc_off_train e_i_ratio_off_train] = readout_amp(Ephys,cre_off_cs ,1);
-[epsc_on_traink tr trtt] = readout_amp(Ephys,cre_on_k ,1);
-[epsc_off_traink trr trtttt] = readout_amp(Ephys,cre_off_k ,1);
-%% Read out max epsc and ipsc amplitude for train stimulus, and the two high frequency stimuli
-temp=[];
-for i=1:length(find(all_cs==1));
-   temp=find(all_cs==1);
-   all_et(i)=max(abs(Ephys(temp(i)).train_n(:)));
-   all_it(i)=max(abs(Ephys(temp(i)).train_p(:)));
-end
-temp=[];
-for i=1:length(find(all_cs==1));
-    temp=find(all_cs==1);
-    if isempty(Ephys(temp(i)).high_n)==0
-   all_ehf(i)=max(abs(Ephys(temp(i)).high_n(:)));
-    else
-    all_ehf(i)=NaN;
-    end
-     if isempty(Ephys(temp(i)).high_p)==0
-   all_ihf(i)=max(abs(Ephys(temp(i)).high_p(:)));
-     else
-     all_ihf(i)=NaN;   
-    end
-end
-temp=[];
-for i=1:length(find(all_cs==1));
-    temp=find(all_cs==1);
-    if isempty(Ephys(temp(i)).highf_n)==0
-   all_ehf2(i)=max(abs(Ephys(temp(i)).highf_n(:)));
-    else
-    all_ehf2(i)=NaN;
-    end
-     if isempty(Ephys(temp(i)).highf_p)==0
-   all_ihf2(i)=max(abs(Ephys(temp(i)).highf_p(:)));
-     else
-     all_ihf2(i)=NaN;   
-    end
-end
 
-all_eit=all_et./all_it;
-all_eif=all_ehf./all_ihf;
-all_eif2=all_ehf2./all_ihf2;
-%% 
-edges = [0:0.25:2];
-fig4=figure;set(fig4, 'Position', [200, 200, 200, 200]);set(gcf,'color','w');
-h1=histogram(all_eit,edges,'Normalization','probability');h1.FaceColor='k'
-hold on;h2=histogram(all_eif,edges,'Normalization','probability');h2.FaceColor='g'
-hold on;h3=histogram(all_eif2,edges,'Normalization','probability');h3.FaceColor='m'
-box off;xlabel('E/I ratio');ylabel('Relative counts');legend({'1 Hz','25 Hz','50 Hz'});
-hold on;plot([1 1],[0 0.3],'--k');legend boxoff 
+
+
 %% Plotexmaple epsc/ipsc single pulse
 %cnr=22;
 cnr=22
