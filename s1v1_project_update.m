@@ -5,13 +5,31 @@ load(char(folder_list));
 %sampling rate
 srF=20;
 sr=20000;
-%% get all excitatory cells with EPSC/IPSC L2/3
+%% Readout of cells 
+%get all excitatory cells with EPSC/IPSC L2/3
 temp1=[];
 lv=[0 1];
 for i=1:2
 temp1(i,:)=cell_selecter(Ephys,'label',lv(i),'sol',2,'layer',3);
 end
 pyr_cs=sum(temp1);
+%  get all cre on/ cre off L2/3 NON PAIRED
+pyr_cs_creon=cell_selecter(Ephys,'label',1,'sol',2,'layer',3);
+pyr_cs_creoff=cell_selecter(Ephys,'label',0,'sol',2,'layer',3);
+% Cs-gluc cells in L23 PAIRED
+temp1=[];temp2=[];
+for i=1:5
+temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',2,'geno',7,'pair',i);
+temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',2,'geno',7,'pair',i);
+end
+cre_on_cs=sum(temp1);cre_off_cs=sum(temp2);
+%Paired Cs-gluc cells in L23
+temp1=[];temp2=[];
+for i=1:5
+temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',1,'geno',7,'pair',i);
+temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',1,'geno',7,'pair',i);
+end
+cre_on_k=sum(temp1);cre_off_k=sum(temp2);
 %% Plot example 
 cnr=33 %210914SW0002 (nonlabelled)
 ov_min=-400;ov_max=600;
@@ -25,9 +43,7 @@ else
 hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
 hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 end
-%%  get all cre on/ cre off L2/3 NON PAIRED
-pyr_cs_creon=cell_selecter(Ephys,'label',1,'sol',2,'layer',3);
-pyr_cs_creoff=cell_selecter(Ephys,'label',0,'sol',2,'layer',3);
+
 %% Cre on vs cre off 
 %CRE ON
 cnr=7;%210907SW001
@@ -60,22 +76,7 @@ hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c
 end
 ylim([ov_min-10 ov_max]);title('Cre-','Color','k');
 
-%% Cs-gluc cells in L23 PAIRED
-temp1=[];temp2=[];
-for i=1:5
-temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',2,'geno',7,'pair',i);
-temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',2,'geno',7,'pair',i);
-end
-cre_on_cs=sum(temp1);
-cre_off_cs=sum(temp2);
-%Paired Cs-gluc cells in L23
-temp1=[];temp2=[];
-for i=1:5
-temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',1,'geno',7,'pair',i);
-temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',1,'geno',7,'pair',i);
-end
-cre_on_k=sum(temp1);
-cre_off_k=sum(temp2);
+
 %% Paired comparison EPSC IPSC using the first high frequcny pulse
 [epsc_on_train ipsc_on_train e_i_ratio_on_train] = readout_amp(Ephys,cre_on_cs ,2);
 [epsc_off_train ipsc_off_train e_i_ratio_off_train] = readout_amp(Ephys,cre_off_cs ,2);

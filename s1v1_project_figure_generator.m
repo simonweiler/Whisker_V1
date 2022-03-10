@@ -1,53 +1,121 @@
-%% Load data structure for S1 V1
+%% Load data structure for S1 V1 using uipickfiles 
 str   = 'D:\Postdoc_Margrie\Projects\Whisker\output_structure';
 folder_list = uipickfiles('FilterSpec',str);
 load(char(folder_list));
 %sampling rate
 srF=20;
 sr=20000;
-%% Readout indeces of different cells using cell selecter function 
-%get all excitatory cells with EPSC/IPSC L2/3
-temp1=[];
+%% Readout indices of different cells using cell selecter function 
+
+%get all excitatory cells with EPSC/IPSC L2/3 with no TTX 4AP
+temp1=[];temp2=[];pyr_cs=[];
 lv=[0 1];
 for i=1:2
-temp1(i,:)=cell_selecter(Ephys,'label',lv(i),'sol',2,'layer',3);
+temp1(i,:)=cell_selecter(Ephys,'label',lv(i),'sol',2,'layer',3,'drugs',0);
+temp2(i,:)=cell_selecter(Ephys,'label',lv(i),'sol',2,'layer',3,'drugs',1);
 end
-pyr_cs=sum(temp1);
-%  get all cre on/ cre off L2/3 NON PAIRED
+pyr_cs=sum([temp1; temp2]);
+
+
+% get all cre on/ cre off L2/3 NON PAIRED no TTX 4AP also including K and
+% Cs
+temp1=[];temp2=[];pyr_cs_creoff=[];pyr_cs_creon=[];pyr_k_creon=[];pyr_k_creoff=[];
+temp1=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'drugs',0);
+temp2=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'drugs',1);
+pyr_cs_creoff=sum([temp1; temp2]);
 pyr_cs_creon=cell_selecter(Ephys,'label',1,'sol',2,'layer',3);
-pyr_cs_creoff=cell_selecter(Ephys,'label',0,'sol',2,'layer',3);
+pyr_k_creon=cell_selecter(Ephys,'label',1,'layer',3,'geno',7,'sol',1);
+pyr_k_creoff=cell_selecter(Ephys,'label',0,'layer',3,'geno',7,'sol',1);
+
+
 % Cs-gluc cells in L23 PAIRED
-temp1=[];temp2=[];
+temp1=[];temp2=[];cre_on_cs=[];
 for i=1:5
 temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',2,'geno',7,'pair',i);
 temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',2,'geno',7,'pair',i);
 end
 cre_on_cs=sum(temp1);cre_off_cs=sum(temp2);
-%Paired K-gluc cells in L23
-temp1=[];temp2=[];
+
+
+%K-gluc cells in L23 PAIRED
+temp1=[];temp2=[];cre_on_k=[];
 for i=1:5
 temp1(i,:) = cell_selecter(Ephys,'label',[1],'sol',1,'geno',7,'pair',i);
 temp2(i,:) = cell_selecter(Ephys,'label',[0],'sol',1,'geno',7,'pair',i);
 end
 cre_on_k=sum(temp1);cre_off_k=sum(temp2);
-%PN vs PV read out 
-%CS solution 
-pyr_cs_pv=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'geno',5);
-pv_cs_pv=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5);
-%K solution only pairs
-temp1=[];temp2=[];
+%% PN vs IN (GAD/PV) read out using cell selecter function 
+
+%NON PAIRED CS solution without TTX 4AP, including wash in
+temp1=[];temp2=[];pyr_cs_pv_all=[];
+temp1=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'geno',5,'drugs',0);
+temp1=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'geno',5,'drugs',1);
+pyr_cs_pv_all=sum([temp1; temp2]);
+temp1=[];temp2=[];pv_cs_pv_all=[];
+temp1=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',0);
+temp2=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',1);
+pv_cs_pv_all=sum([temp1; temp2]);
+
+
+%PAIRED CS solution without TTX 4AP, excluding wash in 
+pyr_cs_pv=[];pv_cs_pv=[];
+pyr_cs_pv=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'geno',5,'drugs',0);
+pv_cs_pv=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',0);
+
+
+%PAIRED CS solution with TTX 4AP, be careful to place if statment to read traces
+%out after wash in 
+temp1=[];temp2=[];pyr_ttx=[];
+temp1=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'geno',5,'drugs',1);
+temp2=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'geno',5,'drugs',2);
+pyr_ttx=sum([temp1; temp2]);
+temp1=[];temp2=[];pv_ttx=[];
+temp1=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',1);
+temp2=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',2);
+pv_ttx=sum([temp1; temp2]);
+
+%TTX 4AP WASH IN experiments 
+temp1=[];temp2=[];pyr_washin=[];
+temp1=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'drugs',1);
+temp2=cell_selecter(Ephys,'label',1,'sol',2,'layer',3,'drugs',1);
+pyr_washin=sum([temp1; temp2]);
+temp1=[];temp2=[];pv_washin=[];
+temp1=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'drugs',1);
+pv_washin=sum([temp1; temp2]);
+
+
+%PAIRED K solution without TTX 4AP
+temp1=[];temp2=[];pyr_k_pv=[];pv_k_pv=[];
 for i=1:3
-temp1(i,:) = cell_selecter(Ephys,'label',[0],'sol',1,'geno',5,'pair',i);
-temp2(i,:) = cell_selecter(Ephys,'label',[3],'sol',1,'geno',5,'pair',i);
+temp1(i,:) = cell_selecter(Ephys,'label',0,'sol',1,'geno',5,'pair',i);
+temp2(i,:) = cell_selecter(Ephys,'label',3,'sol',1,'geno',5,'pair',i);
 end
-pyr_k_pv=sum(temp1);pv_k_pv=sum(temp2);
-% read put peaks from train for PN cs
+pyr_k_pv=sum(temp1);
+pv_k_pv=sum(temp2);
+
+
+
+
+%Spiking PN (cre off + cre on) vs IN (GAD+PV lines)
+temp1=[];lab=[];lab=[0 1];
+for i=1:2
+temp1(i,:) = cell_selecter(Ephys,'label',lab(i),'sol',1);
+end
+pyr_k=sum(temp1);
+
+temp2=[];lab=[];lab=[2 3];
+for i=1:2
+temp2(i,:) = cell_selecter(Ephys,'label',lab(i),'sol',1);
+end
+in_k=sum(temp2);
+
+%%  Read put peaks from train for PN cs (trained used here, not high frequency ones)
 epsc_pyr_train=[];ipsc_pyr_train=[];
 [epsc_pyr_train ipsc_pyr_train e_i_pyr_train] = readout_amp(Ephys,pyr_cs ,1);
 %% Time to peak ex and in for retro cells using first pulse of long train 
-temp=[];t_ex=[];t_in=[];t_in_ex=[];
+temp=[];t_ex=[];t_in=[];t_in_ex=[];trace_smooth_ex=[];trace_smooth_in=[];
 temp=find(pyr_cs==1);
-fc_1=3;
+fc_1=3.5;
 close all
 for i=1:length(temp)
     try
@@ -62,14 +130,17 @@ for i=1:length(temp)
     end
     catch
      t_ex(i)=NaN;
-     t_in(i)=NaN 
-     t_in_ex(i)=NaN; 
+     t_in(i)=NaN; 
+     t_in_ex(i)=NaN;   
     end
 end
 close all;
-%% weird cell : in train EPSC traces shows longer delay then at 0 mV because of thresholding, just missing the EPSC in the 0 mV trace
-fc_2;
-[t_in_ex(30)]=time_to_peak(Ephys(temp(i)).sub_traces_train(:,1),[3000:1:5000],[5000:1:6000],20,0,fc_2);
+%% weird cells : in train EPSC traces shows longer delay then at 0 mV because of thresholding, just missing the EPSC in the 0 mV trace
+% fc_2;
+% [t_in_ex(30)]=time_to_peak(Ephys(temp(i)).sub_traces_train(:,1),[3000:1:5000],[5000:1:6000],20,0,fc_2);
+t_in_ex(30)=NaN;
+t_ex(30)=NaN;
+t_in(34)=NaN;
 %% Main Figure panel c plot EPSC and ISPC example  
 cnr=23 %210914SW0002 (nonlabelled cs solution, no drugs)
 ov_min=-400;ov_max=600;temp=[];temp=find(pyr_cs==1);
@@ -96,7 +167,39 @@ cl={'r','b'};
 data=[];data=t_ein;;
 paired_plot_box(data,cl);
 xticklabels({'EX','IN'});ylabel('Onset Latency (ms)');set(gca,'FontSize',10);
-%% Cre on vs cre off 
+
+%% %% TTX modulation index for PN ; not happy with readout
+temp=[];temp=find(pyr_washin==1);ttx_ipsc=[];ttx_epsc=[];
+
+ttx_ipsc=[max(abs(Ephys(temp(1)).high_p(1:2,2))) max(abs(Ephys(temp(1)).high_p(1:2,3)));...
+    max(abs(Ephys(temp(2)).high_p(1:2,2))) max(abs(Ephys(temp(2)).high_p(1:2,3)));...
+  max(abs(Ephys(temp(3)).high_p(1:2,2))) max(abs(Ephys(temp(3)).high_p(1:2,3)));...
+   max(abs(Ephys(temp(4)).high_p(1:2,2))) max(abs(Ephys(temp(4)).high_p(1:2,4)))];
+
+ttx_epsc=[max(abs(Ephys(temp(1)).high_n(1:2,1))) max(abs(Ephys(temp(1)).high_n(1:2,4)));...
+    max(abs(Ephys(temp(2)).high_n(1:2,1))) max(abs(Ephys(temp(2)).high_n(1:2,4)));...
+  max(abs(Ephys(temp(3)).high_n(1:2,1))) max(abs(Ephys(temp(3)).high_n(1:2,4)));...
+   max(abs(Ephys(temp(4)).high_n(1:2,1))) max(abs(Ephys(temp(4)).high_n(1:2,3)))];
+
+cl={'k','m'};
+data=[];data=ttx_ipsc;
+paired_plot_box(data,cl);
+xticklabels({'before','TTX + 4AP'});ylabel('IPSC amplitude (pA)');set(gca,'FontSize',10);
+xtickangle(45);yticks([0:125:250]);
+
+cl={'k','m'};
+data=[];data=ttx_epsc;
+paired_plot_box(data,cl);
+xticklabels({'before','TTX + 4AP'});ylabel('EPSC amplitude (pA)');set(gca,'FontSize',10);
+xtickangle(45);
+%% TTX Modulation index 
+par=[(ttx_ipsc(:,2)-ttx_ipsc(:,1))./(ttx_ipsc(:,2)+ttx_ipsc(:,1)); (ttx_epsc(:,2)-ttx_epsc(:,1))./(ttx_epsc(:,2)+ttx_epsc(:,1))]
+s1=[1:4];s2=[5:8]
+[statsout]=dual_barplot(par,s1,s2,2);xticks([1:1:2]);hold on;
+xticklabels({'IPSC' ,'EPSC'});ylabel('TTX modulation index');set(gca,'FontSize',10);xtickangle(45);
+
+
+%% Cre on vs cre off example cell traces
 %CRE ON
 cnr=7;%210907SW001
 ov_min=-150;ov_max=20;
@@ -113,7 +216,6 @@ else
 hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 end
 ylim([ov_min-10 ov_max]);title('Cre+','Color','m');
-
 %CRE OFF
 cnr=4;%210907SW001
 temp=[];temp=find(pyr_cs_creoff==1);
@@ -127,7 +229,7 @@ else
 hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 end
 ylim([ov_min-10 ov_max]);title('Cre-','Color','k');
-%% Paired comparison EPSC IPSC using the first high frequency pulse
+%% Paired comparison EPSC IPSC using the first high frequency pulse for Cre on and Cre off Supp figure b) 
 [epsc_on_train ipsc_on_train e_i_ratio_on_train] = readout_amp(Ephys,cre_on_cs ,2);
 [epsc_off_train ipsc_off_train e_i_ratio_off_train] = readout_amp(Ephys,cre_off_cs ,2);
 [epsc_on_traink tr trtt] = readout_amp(Ephys,cre_on_k ,2);
@@ -135,11 +237,117 @@ ylim([ov_min-10 ov_max]);title('Cre-','Color','k');
 % only using pairs
 cl={'m','k'};
 data=[];data=[[epsc_on_train epsc_on_traink]' [epsc_off_train epsc_off_traink]'];
-paired_plot_box(data,cl);
+paired_plot_box(data,cl);ylabel('Light evoked EPSC (pA)');xticklabels({'Cre+', 'Cre-'});set(gca,'FontSize',10);
 data=[];data=[[ipsc_on_train]' [ipsc_off_train]'];
 cl={'m','k'};
-paired_plot_box(data,cl);
-%% Plot EX vs IN delay difference
+paired_plot_box(data,cl);ylabel('Light evoked IPSC (pA)');xticklabels({'Cre+', 'Cre-'});set(gca,'FontSize',10);
+%% Comparison onset latency for Cre on and Cre off
+%CRE ON
+temp=[];t_ex_on=[];t_ex_ontr=[];peak_present_on=[];
+%temp=find(cre_on_cs==1 | cre_on_k==1);
+temp=find(pyr_cs_creon==1);
+fc_1=3.5;
+close all
+for i=1:length(temp)
+    try
+    if max(Ephys(temp(i)).sub_traces_high(1:1*sr,2))>max(Ephys(temp(i)).sub_traces_high(1:1*sr,1))==1
+[t_ex_on(i) t_ex_ontr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,1),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_on(i)=Ephys(temp(i)).high_n(1,1)<0;
+    else
+      [t_ex_on(i)  t_ex_ontr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,2),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_on(i)=Ephys(temp(i)).high_n(1,2)<0;
+    end
+    catch
+     t_ex_on(i)=NaN;   
+    end
+end
+close all;
+%CRE OFF
+temp=[];t_ex_off=[]; t_ex_offtr=[];peak_present_off=[];
+%temp=find(cre_off_cs==1 | cre_off_k==1);
+temp=find(pyr_cs_creoff==1);
+fc_1=3.5;
+close all
+for i=1:length(temp)
+    try
+    if max(Ephys(temp(i)).sub_traces_high(1:1*sr,2))>max(Ephys(temp(i)).sub_traces_high(1:1*sr,1))==1
+    [t_ex_off(i) t_ex_offtr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,1),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_off(i)=Ephys(temp(i)).high_n(1,1)<0;
+    else
+      [t_ex_off(i) t_ex_offtr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,2),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_off(i)=Ephys(temp(i)).high_n(1,2)<0;
+    end
+    catch
+     t_ex_off(i)=NaN;   
+    end
+end
+close all;
+%% using also K-internal cells 
+%CRE ON
+temp=[];t_ex_kon=[];t_ex_kontr=[];peak_present_kon=[];
+%temp=find(cre_on_cs==1 | cre_on_k==1);
+temp=find(pyr_k_creon==1);
+fc_1=3.5;
+close all
+for i=1:length(temp)
+    try
+    if min(Ephys(temp(i)).sub_traces_high(1:1*sr,2))>min(Ephys(temp(i)).sub_traces_high(1:1*sr,1))==1
+[t_ex_kon(i) t_ex_kontr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,1),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_kon(i)=Ephys(temp(i)).high_n(1,1)<0;
+    else
+      [t_ex_kon(i)  t_ex_kontr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,2),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_kon(i)=Ephys(temp(i)).high_n(1,2)<0;
+    end
+    catch
+     t_ex_kon(i)=NaN;   
+    end
+end
+close all;
+
+%CRE OFF
+temp=[];t_ex_koff=[]; t_ex_kofftr=[];peak_present_koff=[];
+%temp=find(cre_off_cs==1 | cre_off_k==1);
+temp=find(pyr_k_creoff==1);
+fc_1=3.5;
+close all
+for i=1:length(temp)
+    try
+    if min(Ephys(temp(i)).sub_traces_high(1:1*sr,2))>min(Ephys(temp(i)).sub_traces_high(1:1*sr,1))==1
+    [t_ex_koff(i) t_ex_kofftr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,1),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_koff(i)=Ephys(temp(i)).high_n(1,1)<0;
+    else
+      [t_ex_koff(i) t_ex_kofftr(:,i)]=time_to_peak(Ephys(temp(i)).sub_traces_high(:,2),[3000:1:5000],[5000:1:5500],20,0,fc_1);
+    peak_present_koff(i)=Ephys(temp(i)).high_n(1,2)<0;
+    end
+    catch
+     t_ex_koff(i)=NaN;   
+    end
+end
+close all;
+%% Figure showing onset latencies
+cre_on_latency=t_ex_on(find(peak_present_on==1));
+cre_on_latency(find(isnan(cre_on_latency)))=[];
+cre_off_latency=t_ex_off(find(peak_present_off==1));
+cre_off_latency(find(isnan(cre_off_latency)))=[];
+cre_kon_latency=t_ex_kon(find(peak_present_kon==1));
+cre_kon_latency(find(isnan(cre_kon_latency)))=[];
+cre_koff_latency=t_ex_koff(find(peak_present_koff==1));
+cre_koff_latency(find(isnan(cre_koff_latency)))=[];
+cre_on_latency=[cre_on_latency cre_kon_latency];
+cre_off_latency=[cre_off_latency cre_koff_latency];
+
+fig6= figure;set(fig6, 'Name', 'compare latency cre on cre off');set(fig6, 'Position', [200, 300, 150, 250]);set(gcf,'color','w');
+gr_m=[nanmean(cre_on_latency) nanmean(cre_off_latency)];  
+gr_sem=[nanstd(cre_on_latency)/sqrt(length(cre_on_latency))...
+    nanstd(cre_off_latency)/sqrt(length(cre_off_latency))];
+hold on;
+b=bar(1,gr_m(1));b.FaceColor='k';b.FaceAlpha=0.75;
+b=bar(2,gr_m(2));b.FaceColor='k';b.FaceAlpha=0.5;
+% hold on;scatter(ones(length(e_i_ratio_pyr_long(a1)),1),e_i_ratio_pyr_long(a1),7,'o','MarkerEdgeColor',[0.5 0.5 0.5]);
+% hold on;scatter(ones(length(e_i_ratio_pyr_hf(a2)),1)*2,e_i_ratio_pyr_hf(a2),7,'o','MarkerEdgeColor',[0.5 0.5 0.5]);
+% hold on;scatter(ones(length(e_i_ratio_pyr_hf2(a3)),1)*3,e_i_ratio_pyr_hf2(a3),7,'o','MarkerEdgeColor',[0.5 0.5 0.5]);
+hold on;er=errorbar(1:2,gr_m,gr_sem);er.Color = [0 0 0];er.LineWidth=1;er.LineStyle = 'none'; hold on;
+xticks([1:1:2]);ylabel('Onset latency (ms)');xticklabels({'Cre+','Cre-'});xtickangle(45);set(gca,'FontSize',10);
 
 %% Show E/I ratio from all PYR cells
 [epsc_pyr_long ipsc_pyr_long e_i_ratio_pyr_long] = readout_amp(Ephys,pyr_cs ,1);
@@ -288,17 +496,6 @@ hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c
 ylim([ov_min-10 ov_max]);title('PV','Color',[0.8500 0.3250 0.0980]);
 % 
 %% Spiking or not PYR vs nonFS and FS
-temp1=[];lab=[];lab=[0 1];
-for i=1:2
-temp1(i,:) = cell_selecter(Ephys,'label',lab(i),'sol',1);
-end
-pyr_k=sum(temp1);
-
-temp2=[];lab=[];lab=[2 3];
-for i=1:2
-temp2(i,:) = cell_selecter(Ephys,'label',lab(i),'sol',1);
-end
-in_k=sum(temp2);
 epsp_pyr=[];epsp_in=[];
 [epsp_pyr] = readout_amp_epsp(Ephys,pyr_k ,2,sr);
 [epsp_in] = readout_amp_epsp(Ephys,in_k ,2,sr);
@@ -309,8 +506,12 @@ pv_label=[Ephys(temp).label]==3;
 for i=1:length(temp)
     try
     maxsF(i)=max(Ephys(temp(i)).IV.spikecount);
+    spikecount_in{:,i}=Ephys(temp(i)).IV.spikecount;
+    stimvec_in{:,i}=Ephys(temp(i)).IV.stimvec;
     catch
     maxsF(i)=NaN;
+    spikecount_in{:,i}=NaN;
+    stimvec_in{:,i}=NaN;
     end
 end
 temp=[];maxsF_pyr=[];
@@ -318,12 +519,22 @@ temp=find(pyr_k==1);
 for i=1:length(temp)
     try
     maxsF_pyr(i)=max(Ephys(temp(i)).IV.spikecount);
+    spikecount_pyr{:,i}=Ephys(temp(i)).IV.spikecount;
+    stimvec_pyr{:,i}=Ephys(temp(i)).IV.stimvec;
     catch
     maxsF_pyr(i)=NaN;
+    spikecount_pyr{:,i}=NaN;
+    stimvec_pyr{:,i}=NaN;
     end
 end
 %bug in first cell
-maxsF(1)=86;
+for t=1:length(Ephys(43).IV.stimvec)
+ spike_event_43{:,t}=spike_times(Ephys(43).IV.traces(:,t),1.1);
+ spike_log_43(:,t)=~isempty(spike_event{:,t});
+ spikecount_43(:,t)=length(spike_event{:,t});
+end
+spikecount_in{1, 1}=spikecount_43;
+maxsF(1)=max(spikecount_43);
 %fraction of spikers
 spike_FS=sum(epsp_in>50)/(sum(maxsF>50)+1);
 spike_nFS=0;
@@ -426,6 +637,78 @@ g1=1:length(p1);
 g2=length(p1)+1:length(par);
 [statsout]=dual_barplot(par,g1,g2,0);
 ylabel('APVslope (mV/ms)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS IN'});xtickangle(45);
+
+
+%% Injected current vs Voltage 
+a=[];a=find(maxsF>50 | pv_label==1);
+b=[];b=find(maxsF<50);
+for k=1:25
+    for i=1:length(spikecount_in(a))
+        try
+        s1(i)=spikecount_in{:,a(i)}(k);       
+        catch 
+         s1(i)=NaN;   
+        end
+    end
+    mean_fs(k)=nanmean(s1);
+end
+s1=[];
+for k=1:25
+    for i=1:length(spikecount_in(b))
+        try
+        s1(i)=spikecount_in{:,b(i)}(k);       
+        catch 
+         s1(i)=NaN;   
+        end
+    end
+    mean_nfs(k)=nanmean(s1);
+end
+s1=[];
+for k=1:25
+    for i=1:length(spikecount_pyr)
+        try
+        s1(i)=spikecount_pyr{:,i}(k);       
+        catch 
+         s1(i)=NaN;   
+        end
+    end
+    mean_pyr(k)=nanmean(s1);
+end
+%% 
+
+ fig4=figure;set(fig4, 'Position', [200, 600, 600, 300]);set(gcf,'color','w');
+ for i=1:length(spikecount_in(a))
+     p1=plot(stimvec_in{:,a(i)},spikecount_in{:,a(i)},'r', 'MarkerFaceColor','r');p1.Color(4)=3/8;
+     hold on;set(gca,'box','off');
+ end
+hold on;
+ for i=1:length(spikecount_in(b))
+     p1=plot(stimvec_in{:,b(i)},spikecount_in{:,b(i)},'m', 'MarkerFaceColor','m');p1.Color(4)=3/8;
+     hold on;set(gca,'box','off');
+ end
+hold on;
+for i=1:length(spikecount_pyr)
+     p1=plot(stimvec_pyr{:,i},spikecount_pyr{:,i},'k', 'MarkerFaceColor','k');p1.Color(4)=3/8;
+     hold on;set(gca,'box','off');
+end
+ylabel('Spike frequency (Hz)');xlabel('Injected current (pA)')
+hold on;plot(stimvec_pyr{:,end},mean_fs,'r-o','LineWidth',3);
+hold on;plot(stimvec_pyr{:,end},mean_nfs,'m-o','LineWidth',3);
+hold on;plot(stimvec_pyr{:,end},mean_pyr,'k-o','LineWidth',3);
+%% 
+for i=1:length(spikecount_pyr);
+pyramidal_cells{:,i}=[stimvec_pyr{:,i}' spikecount_pyr{:,i}'];
+end
+for i=1:length(spikecount_in(b));
+nonfast_interneuron{:,i}=[stimvec_in{:,b(i)}' spikecount_in{:,b(i)}'];
+end
+for i=1:length(spikecount_in(a));
+fast_interneuron{:,i}=[stimvec_in{:,a(i)}' spikecount_in{:,a(i)}'];
+end
+%% 
+data_gain.pyramidal_cells=pyramidal_cells;
+data_gain.nonfast_interneuron=nonfast_interneuron;
+data_gain.fast_interneuron=fast_interneuron;
 %% TTX wash in 
 all_cs_ttx = cell_selecter(Ephys,'sol',2,'drugs',1);
 temp=[];
