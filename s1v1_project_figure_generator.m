@@ -74,7 +74,7 @@ temp1=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',1);
 temp2=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',2);
 pv_ttx=sum([temp1; temp2]);
 
-%PAIRED CS solution without TTX 4AP, excluding wash in 
+%PAIRED CS solution without TTX 4AP, only wash in 
 pyr_cs_pv_washin=[];pv_cs_pv_washin=[];
 pyr_cs_pv_washin=cell_selecter(Ephys,'label',0,'sol',2,'layer',3,'geno',5,'drugs',1);
 pv_cs_pv_washin=cell_selecter(Ephys,'label',3,'sol',2,'layer',3,'geno',5,'drugs',1);
@@ -391,7 +391,7 @@ ylim([0 1]);
 [epsc_pv ipsc_pv e_i_ratio_pv] = readout_amp(Ephys,pv_cs_pv ,2,2);
 [epsc_pyr_k] = readout_amp(Ephys,pyr_k_pv ,2,1);
 [epsc_pv_k] = readout_amp(Ephys,pv_k_pv ,2,1);
-%EPSC
+%EPSC NO TTX 4AP
 data=[];data=[[epsc_pyr epsc_pyr_k]' [epsc_pv epsc_pv_k]'];
 cl={'k',[0.8500 0.3250 0.0980]};
 paired_plot_box(data,cl);hold on;xticklabels({'PN','PV'});ylabel('EPSC Amplitude (pA)');set(gca,'FontSize',10);
@@ -406,6 +406,7 @@ paired_plot_box(data,cl);hold on;xticklabels({'PN','PV'});ylabel('EPSC Amplitude
 %% Same for cells with TTX
 [epsc_pyr_ttx ipsc_pyr_ttx e_i_ratio_pyr_ttx] = readout_amp(Ephys,pyr_ttx ,2,2,1,2);
 [epsc_pv_ttx ipsc_pv_ttx e_i_ratio_pv_ttx] = readout_amp(Ephys,pv_ttx ,2,1,2,2);
+%for TTX wash in cell use second half of recording where TTX/4AP was present 
 [epsc_pyr_ttx_sub ipsc_pyr_ttx_sub e_i_ratio_pyr_ttx_sub] = readout_amp(Ephys,pyr_cs_pv_washin,2,2,3,4);
 [epsc_pv_ttx_sub ipsc_pv_ttx_sub e_i_ratio_pv_ttx_sub] = readout_amp(Ephys,pv_cs_pv_washin,2,2,3,4);
 %replace these accordingly
@@ -413,18 +414,235 @@ mm=[];mm=intersect(find(pyr_cs_pv_washin==1),find(pyr_ttx==1));
 for i=1:length(mm)
     epsc_pyr_ttx(find(find(pyr_ttx==1)==mm(i)))=epsc_pyr_ttx_sub(find(find(pyr_cs_pv_washin==1)==mm(i)))
 end
-
 mm=[];mm=intersect(find(pv_cs_pv_washin==1),find(pv_ttx==1));
 for i=1:length(mm)
 epsc_pyr_ttx(find(find(pv_ttx==1)==mm(i)))=epsc_pv_ttx_sub(find(find(pv_cs_pv_washin==1)==mm(i)));
 end
-%EPSC
+
+mm=[];mm=intersect(find(pv_cs_pv_washin==1),find(pv_ttx==1));
+for i=1:length(mm)
+    ipsc_pyr_ttx(find(find(pyr_ttx==1)==mm(i)))=ipsc_pyr_ttx_sub(find(find(pyr_cs_pv_washin==1)==mm(i)))
+end
+mm=[];mm=intersect(find(pv_cs_pv_washin==1),find(pv_ttx==1));
+for i=1:length(mm)
+ipsc_pyr_ttx(find(find(pv_ttx==1)==mm(i)))=ipsc_pv_ttx_sub(find(find(pv_cs_pv_washin==1)==mm(i)));
+end
+%% Paired plot EPSC PN vs PV with TTX 4AP
 data=[];data=[epsc_pyr_ttx'  epsc_pv_ttx'];
 cl={'k',[0.8500 0.3250 0.0980]};
-paired_plot_box(data,cl);hold on;xticklabels({'PN','PV'});ylabel('EPSC Amplitude (pA)');set(gca,'FontSize',10);
+paired_plot_box(data,cl);hold on;xticklabels({'PN','PV'});set(gca,'FontSize',10);
+title('TTX + 4AP');ylim([0 1000]);
+set(gca,'ytick',[]);%ylabel('EPSC Amplitude (pA)')
+%% show example trace without TTX (I think that is fair)
+%PN
+cnr=2;%
+ov_min=-500;ov_max=50;
+range=2000:9000;
+temp=[];temp=find(pyr_k_pv==1);
+fig4=figure;set(fig4, 'Position', [200, 200, 250, 200]);set(gcf,'color','w');
+subplot(1,2,1)
+%if max(Ephys(temp(cnr)).sub_traces_high(range,2))>max(Ephys(temp(cnr)).sub_traces_high(range,1))
+plot(Ephys(temp(cnr)).sub_traces_high(range,1),'Color','k','LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','b','LineWidth',1);set(gca,'box','off');hold on;
+% else
+%  plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color','m','LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
+hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+%end
+ylim([ov_min-10 ov_max]);title('PN','Color','k');
+
+%PV
+cnr=2;%210907SW001
+temp=[];temp=find(pv_k_pv==1);
+subplot(1,2,2);
+%if max(Ephys(temp(cnr)).sub_traces_high(range,2))>max(Ephys(temp(cnr)).sub_traces_high(range,1))
+plot(Ephys(temp(cnr)).sub_traces_high(range,1),'Color',[0.8500 0.3250 0.0980],'LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);
+% else
+%  plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color','k','LineWidth',1);set(gca,'box','off');
+%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
+hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+% end
+ylim([ov_min-10 ov_max]);title('PV','Color',[0.8500 0.3250 0.0980]);
+% 
+
+%% Same input leads to spiking in one cell but not the other: what ate the underlying reasons 
+%The easiest way to analyze the rise time of your EPSP traces is determining the "20-80% rise time". 
+% To do so, you measure the amplitude of your EPSP from the preceding baseline 
+% (e. g., before the stimulation artefact of your evoked EPSP), then you determine the 20 and 80% of that 
+% EPSP amplitude and make a linear fitting between these two points. This is a good estimation of the rise time of 
+% PSPs and PSCs in general, regardless of the nature of the signal. 
+% This "20-80% rise time" may be comparable to the results of more elaborated 
+% mathematical methods such as single exponential fitting and first derivative.
+%PN cells under TTX 4AP
+range=[];range=1:60000;
+cell_select=pyr_ttx;
+range_save=5000:7000;
+ind1=1;ind2=2;
+norm_traces_pyr=[]; rise_time_pyr=[];decay_time_pyr=[];
+[norm_traces_pyr rise_time_pyr decay_time_pyr] = constant_traces(Ephys, cell_select,range, range_save, ind1, ind2);
+% use ttx sub after again accordingly
+range=[];range=1:60000;
+cell_select=pyr_cs_pv_washin;
+range_save=5000:7000;
+ind1=3;ind2=4;
+norm_traces_pyr_sub=[]; rise_time_pyr_sub=[];decay_time_pyr_sub=[];
+[norm_traces_pyr_sub rise_time_pyr_sub decay_time_pyr_sub] = constant_traces(Ephys, cell_select,range, range_save, ind1, ind2);
+mm=[];mm=intersect(find(pyr_cs_pv_washin==1),find(pyr_ttx==1));
+for i=1:length(mm)
+    rise_time_pyr(find(find(pyr_ttx==1)==mm(i)))=rise_time_pyr_sub(find(find(pyr_cs_pv_washin==1)==mm(i)));
+    decay_time_pyr(find(find(pyr_ttx==1)==mm(i)))=decay_time_pyr_sub(find(find(pyr_cs_pv_washin==1)==mm(i)));
+end
+%% PV cells under TTX 4AP
+range=[];range=1:60000;
+cell_select=pv_ttx;
+range_save=5000:7000;
+ind1=1;ind2=2;
+norm_traces_pv=[]; rise_time_pv=[]; decay_time_pv=[];
+[norm_traces_pv rise_time_pv decay_time_pv] = constant_traces(Ephys, cell_select,range, range_save, ind1, ind2);
+range=[];range=1:60000;
+cell_select=pv_cs_pv_washin;
+range_save=5000:7000;
+ind1=3;ind2=4;
+norm_traces_pv_sub=[]; rise_time_pv_sub=[]; decay_time_pv_sub=[];
+[norm_traces_pv_sub rise_time_pv_sub decay_time_pv_sub] = constant_traces(Ephys, cell_select,range, range_save, ind1, ind2);
+mm=[];mm=intersect(find(pv_cs_pv_washin==1),find(pv_ttx==1));
+for i=1:length(mm)
+    rise_time_pv(find(find(pv_ttx==1)==mm(i)))=rise_time_pv_sub(find(find(pv_cs_pv_washin==1)==mm(i)));
+    decay_time_pv(find(find(pv_ttx==1)==mm(i)))=decay_time_pv_sub(find(find(pv_cs_pv_washin==1)==mm(i)));
+end
+%% rise and decay time under TTX
+p1=[];p2=[];p1=rise_time_pyr;p2=rise_time_pv;
+par=[];par=[p1 p2]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout]=dual_barplot(par,g1,g2,0);
+hold on;xticks([1 2]);xticklabels({'PN','PV'});set(gca,'FontSize',10);
+title('TTX + 4AP');ylabel('Rise time (ms)')
 
 
+%decay
+p1=[];p2=[];p1=decay_time_pyr;p2=decay_time_pv;
+par=[];par=[p1 p2]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout]=dual_barplot(par,g1,g2,0);
+hold on;xticks([1 2]);xticklabels({'PN','PV'});set(gca,'FontSize',10);
+title('TTX + 4AP');ylabel('Decay time (ms)');
+%% Same without TTX 4AP
+%rise
+range=[];range=1:60000;
+cell_select=pyr_cs_pv;
+%one is very delayed
+range_save=5000:20000;
+ind1=1;ind2=2;
+norm_traces_pyr_noTTX=[]; rise_time_pyr_noTTX=[];decay_time_pyr_noTTX=[];
+[norm_traces_pyr_noTTX rise_time_pyr_noTTX decay_time_pyr_noTTX] = constant_traces(Ephys, cell_select,range, range_save, ind1, ind2);
+%remove outlier
+rise_time_pyr_noTTX(3)=[];
+decay_time_pyr_noTTX(3)=[];
+rise_time_pyr_noTTX(4)=[];
+decay_time_pyr_noTTX(4)=[];
+
+range=[];range=1:60000;
+cell_select=pv_cs_pv;
+range_save=5000:7000;
+ind1=1;ind2=2;
+norm_traces_pv_noTTX=[]; rise_time_pv_noTTX=[];decay_time_pv_noTTX=[];
+[norm_traces_pv_noTTX rise_time_pv_noTTX decay_time_pv_noTTX] = constant_traces(Ephys, cell_select,range, range_save, ind1, ind2);
+
+%% rise and decay time without TTX
+p1=[];p2=[];p1=rise_time_pyr_noTTX;p2=rise_time_pv_noTTX;
+par=[];par=[p1 p2]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout]=dual_barplot(par,g1,g2,0);
+
+p1=[];p2=[];p1=decay_time_pyr_noTTX;p2=decay_time_pv_noTTX;
+par=[];par=[p1 p2]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout]=dual_barplot(par,g1,g2,0);
+%% Pooled together 
+g1=[];g2=[];
+p1=[];p2=[];p1=[rise_time_pyr rise_time_pyr_noTTX];p2=[rise_time_pv rise_time_pv_noTTX];
+par=[];par=[p1 p2]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout]=dual_barplot(par,g1,g2,0);
+hold on;xticks([1 2]);xticklabels({'PN','PV'});set(gca,'FontSize',10);
+%title('TTX + 4AP');
+ylabel('Rise time (ms)')
+
+g1=[];g2=[];
+p1=[];p2=[];p1=[decay_time_pyr decay_time_pyr_noTTX];p2=[decay_time_pv decay_time_pv_noTTX];
+par=[];par=[p1 p2]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout]=dual_barplot(par,g1,g2,0);
+hold on;xticks([1 2]);xticklabels({'PN','PV'});set(gca,'FontSize',10);
+%title('TTX + 4AP');
+ylabel('Decay time (ms)')
+%% GAIN input output
+%% Injected current vs Voltage 
+a=[];a=find(maxsF>50 | pv_label==1);
+b=[];b=find(maxsF<50);
+%25 is maximum current steps
+for k=1:25
+    for i=1:length(spikecount_in(a))
+        try
+        s1(i)=spikecount_in{:,a(i)}(k);       
+        catch 
+         s1(i)=NaN;   
+        end
+    end
+    mean_fs(k)=nanmean(s1);
+end
+s1=[];
+for k=1:25
+    for i=1:length(spikecount_in(b))
+        try
+        s1(i)=spikecount_in{:,b(i)}(k);       
+        catch 
+         s1(i)=NaN;   
+        end
+    end
+    mean_nfs(k)=nanmean(s1);
+end
+s1=[];
+for k=1:25
+    for i=1:length(spikecount_pyr)
+        try
+        s1(i)=spikecount_pyr{:,i}(k);       
+        catch 
+         s1(i)=NaN;   
+        end
+    end
+    mean_pyr(k)=nanmean(s1);
+end
 %% 
+
+ fig4=figure;set(fig4, 'Position', [200, 600, 300, 300]);set(gcf,'color','w');
+ for i=1:length(spikecount_in(a))
+     p1=plot(stimvec_in{:,a(i)},spikecount_in{:,a(i)});p1.Color=[0.8500 0.3250 0.0980];p1.Color(4)=3/8;
+    
+     hold on;set(gca,'box','off');
+ end
+hold on;
+ for i=1:length(spikecount_in(b))
+     p1=plot(stimvec_in{:,b(i)},spikecount_in{:,b(i)});p1.Color='#A2142F';p1.Color(4)=3/8;
+     hold on;set(gca,'box','off');
+ end
+hold on;
+for i=1:length(spikecount_pyr)
+     p1=plot(stimvec_pyr{:,i},spikecount_pyr{:,i},'k', 'MarkerFaceColor','k');p1.Color(4)=3/8;
+     hold on;set(gca,'box','off');
+end
+ylabel('Spike frequency (Hz)');xlabel('Injected current (pA)')
+hold on;p1=plot(stimvec_pyr{:,end},mean_fs,'-o','LineWidth',2);p1.Color=[0.8500 0.3250 0.0980]
+hold on;p1=plot(stimvec_pyr{:,end},mean_nfs,'-o','LineWidth',2);p1.Color='#A2142F'
+hold on;p1=plot(stimvec_pyr{:,end},mean_pyr,'-o','LineWidth',2);p1.Color='k'
+xlim([0 500])
 
 %% SUPPLEMENTARY %% Cre on vs cre off example cell traces
 %CRE ON
@@ -575,92 +793,11 @@ b=bar(2,gr_m(2));b.FaceColor='k';b.FaceAlpha=0.5;
 % hold on;scatter(ones(length(e_i_ratio_pyr_hf2(a3)),1)*3,e_i_ratio_pyr_hf2(a3),7,'o','MarkerEdgeColor',[0.5 0.5 0.5]);
 hold on;er=errorbar(1:2,gr_m,gr_sem);er.Color = [0 0 0];er.LineWidth=1;er.LineStyle = 'none'; hold on;
 xticks([1:1:2]);ylabel('Onset latency (ms)');xticklabels({'Cre+','Cre-'});xtickangle(45);set(gca,'FontSize',10);
+%% 
 
 
 
-%% extract normalized traces EPSC PYR
-range=[];range=1:60000;
-temp=[];temp=find(pyr_cs_pv==1 | pyr_k_pv==1);
-range_save=[];range_save=5000:6000;
-traces_pyr=[];
-for i=1:length(temp)
- if   size(Ephys(temp(i)).sub_traces_high(range,:),2)>1 
-      
-if isempty(find(Ephys(temp(i)).sub_traces_high(6.24*sr:end,1)<-50))==0 & ...
-        max(Ephys(temp(i)).sub_traces_high(range,2))>max(Ephys(temp(i)).sub_traces_high(range,1))
-traces_pyr(:,i)=Ephys(temp(i)).sub_traces_high(range_save,1)/abs(min(Ephys(temp(i)).sub_traces_high(range_save,1)));
-elseif isempty(find(Ephys(temp(i)).sub_traces_high(6.24*sr:end,2)<-50))==0 & ...
-        max(Ephys(temp(i)).sub_traces_high(range,1))>max(Ephys(temp(i)).sub_traces_high(range,2))
-traces_pyr(:,i)=Ephys(temp(i)).sub_traces_high(range_save,2)/abs(min(Ephys(temp(i)).sub_traces_high(range_save,2)));
-else
-    traces_pyr(:,i)=ones(length(range_save),1)*NaN;
-end
- else
-     if sum(Ephys(temp(i)).high_n)==0
-         traces_pyr(:,i)=ones(length(range_save),1)*NaN;
-     else
-        traces_pyr(:,i)=Ephys(temp(i)).sub_traces_high(range_save,1)/abs(min(Ephys(temp(i)).sub_traces_high(range_save,1)));
-     end
- end
-end
-%% extract normalized traces EPSC PV
-range=[];range=1:60000;
-temp=[];temp=find(pv_cs_pv==1 | pv_k_pv==1);
-range_save=[];range_save=5000:6000;
-traces_pv=[];
-for i=1:length(temp)
- if   size(Ephys(temp(i)).sub_traces_high(range,:),2)>1 
-      
-if isempty(find(Ephys(temp(i)).sub_traces_high(6.24*sr:end,1)<-50))==0 & ...
-        max(Ephys(temp(i)).sub_traces_high(range,2))>max(Ephys(temp(i)).sub_traces_high(range,1))
-traces_pv(:,i)=Ephys(temp(i)).sub_traces_high(range_save,1)/abs(min(Ephys(temp(i)).sub_traces_high(range_save,1)));
-elseif isempty(find(Ephys(temp(i)).sub_traces_high(6.24*sr:end,2)<-50))==0 & ...
-        max(Ephys(temp(i)).sub_traces_high(range,1))>max(Ephys(temp(i)).sub_traces_high(range,2))
-traces_pv(:,i)=Ephys(temp(i)).sub_traces_high(range_save,2)/abs(min(Ephys(temp(i)).sub_traces_high(range_save,2)));
-else
-    traces_pv(:,i)=ones(length(range_save),1)*NaN;
-end
- else
-     if isempty(find(Ephys(temp(i)).sub_traces_high(6.24*sr:end,1)<-50))==1
-        traces_pv(:,i)=ones(length(range_save),1)*NaN;    
-     else
-         traces_pv(:,i)=Ephys(temp(i)).sub_traces_high(range_save,1)/abs(min(Ephys(temp(i)).sub_traces_high(range_save,1)));
-     end
- end
-end
 
-%% show example trace 
-%PYR
-cnr=2;%
-ov_min=-500;ov_max=50;
-range=2000:9000;
-temp=[];temp=find(pyr_k_pv==1);
-fig4=figure;set(fig4, 'Position', [200, 200, 250, 200]);set(gcf,'color','w');
-subplot(1,2,1)
-%if max(Ephys(temp(cnr)).sub_traces_high(range,2))>max(Ephys(temp(cnr)).sub_traces_high(range,1))
-plot(Ephys(temp(cnr)).sub_traces_high(range,1),'Color','k','LineWidth',1);set(gca,'box','off');
-%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','b','LineWidth',1);set(gca,'box','off');hold on;
-% else
-%  plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color','m','LineWidth',1);set(gca,'box','off');
-%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
-hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
-%end
-ylim([ov_min-10 ov_max]);title('PYR','Color','k');
-
-%PV
-cnr=2;%210907SW001
-temp=[];temp=find(pv_k_pv==1);
-subplot(1,2,2);
-%if max(Ephys(temp(cnr)).sub_traces_high(range,2))>max(Ephys(temp(cnr)).sub_traces_high(range,1))
-plot(Ephys(temp(cnr)).sub_traces_high(range,1),'Color',[0.8500 0.3250 0.0980],'LineWidth',1);set(gca,'box','off');
-%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);
-% else
-%  plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color','k','LineWidth',1);set(gca,'box','off');
-%hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
-hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
-% end
-ylim([ov_min-10 ov_max]);title('PV','Color',[0.8500 0.3250 0.0980]);
-% 
 
 
 %% Intrinsic properties
