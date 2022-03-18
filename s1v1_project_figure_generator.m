@@ -1190,3 +1190,71 @@ title('Cre-')
 hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
 hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 % %% 
+%% Read out Rheobase for Vahid
+temp=[];temp=find(pyr_k==1);
+for i=1:length(temp)
+   
+    if ~isempty(Ephys(temp(i)).Rheobase)==1
+rheo_spikecount_pn(i,:)=Ephys(temp(i)).Rheobase.spikecount(1:20);
+rheo_current_pn(i,:)=Ephys(temp(i)).Rheobase.stimvec(1:20);
+    else 
+        rheo_spikecount_pn(i,:)=ones(1,20)*NaN;
+        rheo_current_pn(i,:)=ones(1,20)*NaN;
+    end
+end
+%% 
+temp=[];temp=find(pyr_k==1);
+for i=1:length(temp)
+   
+    if ~isempty(Ephys(temp(i)).Rheobase)==1
+rheo_spikecount_pn(i,:)=Ephys(temp(i)).Rheobase.spikecount(1:20);
+rheo_current_pn(i,:)=Ephys(temp(i)).Rheobase.stimvec(1:20);
+    else 
+        rheo_spikecount_pn(i,:)=ones(1,20)*NaN;
+        rheo_current_pn(i,:)=ones(1,20)*NaN;
+    end
+end
+%% 
+temp=[];temp=find(in_k==1);
+for i=1:length(temp)
+   
+    if ~isempty(Ephys(temp(i)).Rheobase)==1
+rheo_spikecount_in(i,:)=Ephys(temp(i)).Rheobase.spikecount(1:20);
+rheo_current_in(i,:)=Ephys(temp(i)).Rheobase.stimvec(1:20);
+    else 
+        rheo_spikecount_in(i,:)=ones(1,20)*NaN;
+        rheo_current_in(i,:)=ones(1,20)*NaN;
+    end
+end
+
+
+%% 
+temp=[];temp=find(pyr_k==1);
+for i=1:length(temp)
+    if ~isempty(Ephys(temp(i)).Rheobase)==1
+    rheo_fix_pk(i)=Ephys(temp(i)).Rheobase.rheo;
+    else ~isempty(Ephys(temp(i)).Rheobase)==0
+        if ~isempty(Ephys(temp(i)).IV)==1
+        tr=[];tr=find(Ephys(temp(i)).IV.spikecount>0);
+        rheo_fix_pk(i)=Ephys(temp(i)).IV.stimvec(tr(1));
+        else
+        rheo_fix_pk(i)=NaN;
+        end
+    end
+end
+%% 
+
+p1=rheo_fix_pk;p2=rheo_in;
+par=[];par=[p1 p2(a)]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout]=dual_boxplot(par,g1,g2,0);
+xlim([0 3]);ylabel('Threshold current (pA)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});xtickangle(45);
+%% 
+
+rheobase.pn_current=rheo_current_pn;
+rheobase.pn_spikecount=rheo_spikecount_pn;
+rheobase.nonfast_current=rheo_current_in(b,:);
+rheobase.nonfast_spikecount=rheo_spikecount_in(b,:);
+rheobase.fast_current=rheo_current_in(a,:);
+rheobase.fast_spikecount=rheo_spikecount_in(a,:);
