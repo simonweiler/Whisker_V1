@@ -115,9 +115,11 @@ end
 in_k=sum(temp2);
 
 %%  Read put peaks from train for PN cs for train (long), middle frequency (high), highest (highf)
-[epsc_pyr_long ipsc_pyr_long e_i_ratio_pyr_long] = readout_amp(Ephys,pyr_cs ,1,2);
+[epsc_pyr_long ipsc_pyr_long e_i_pyr_train] = readout_amp(Ephys,pyr_cs ,1,2);
 [epsc_pyr_hf ipsc_pyr_hf e_i_ratio_pyr_hf] = readout_amp(Ephys,pyr_cs ,2,2);
 [epsc_pyr_hf2 ipsc_pyr_hf2 e_i_ratio_pyr_hf2] = readout_amp(Ephys,pyr_cs ,3,2);
+%anothe rname for train 
+[epsc_pyr_long ipsc_pyr_long e_i_ratio_pyr_long] = readout_amp(Ephys,pyr_cs ,1,2);
 %% Time to peak ex and in for retro cells using first pulse of long train 
 temp=[];t_ex=[];t_in=[];t_in_ex=[];trace_smooth_ex=[];trace_smooth_in=[];
 temp=find(pyr_cs==1);
@@ -159,7 +161,7 @@ plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','r','LineWidth',1);set(
 hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
 hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 end
-%% Pairecd compariosn of onset latency between EPSC and IPSC  panel d
+%% Paired compariosn of onset latency between EPSC and IPSC  panel d
 t_ex_sub=[];t_ex_sub=t_ex(find(e_i_pyr_train>0));
 t_in_sub=[];t_in_sub=t_in(find(e_i_pyr_train>0));
 t_in_ex_sub=[];t_in_ex_sub=t_in_ex(find(e_i_pyr_train>0));
@@ -173,7 +175,7 @@ cl={'r','b'};
 data=[];data=t_ein;;
 paired_plot_box(data,cl);
 xticklabels({'EX','IN'});ylabel('Onset Latency (ms)');set(gca,'FontSize',10);
-
+%pvalue of paired signrank test:  4.8828e-04
 %% %% TTX modulation index for PN ; not happy with readout
 temp=[];temp=find(pyr_washin==1);ttx_ipsc=[];ttx_epsc=[];
 
@@ -192,17 +194,19 @@ data=[];data=ttx_ipsc;
 paired_plot_box(data,cl);
 xticklabels({'before','TTX + 4AP'});ylabel('IPSC amplitude (pA)');set(gca,'FontSize',10);
 xtickangle(45);yticks([0:125:250]); set(gca,'FontSize',10);
+ylim([0 300]);yticks([0:100:300]);
 
 cl={'r','k'};
 data=[];data=ttx_epsc;
 paired_plot_box(data,cl);
 xticklabels({'before','TTX + 4AP'});ylabel('EPSC amplitude (pA)');set(gca,'FontSize',10);
 xtickangle(45); set(gca,'FontSize',10);
+yticks([0:100:300]);
 %% TTX Modulation index (not used at moment)
-par=[(ttx_ipsc(:,2)-ttx_ipsc(:,1))./(ttx_ipsc(:,2)+ttx_ipsc(:,1)); (ttx_epsc(:,2)-ttx_epsc(:,1))./(ttx_epsc(:,2)+ttx_epsc(:,1))]
-s1=[1:4];s2=[5:8]
-[statsout]=dual_barplot(par,s1,s2,2);xticks([1:1:2]);hold on;
-xticklabels({'IPSC' ,'EPSC'});ylabel('TTX modulation index');set(gca,'FontSize',10);xtickangle(45);
+% par=[(ttx_ipsc(:,2)-ttx_ipsc(:,1))./(ttx_ipsc(:,2)+ttx_ipsc(:,1)); (ttx_epsc(:,2)-ttx_epsc(:,1))./(ttx_epsc(:,2)+ttx_epsc(:,1))]
+% s1=[1:4];s2=[5:8]
+% [statsout]=dual_barplot(par,s1,s2,2);xticks([1:1:2]);hold on;
+% xticklabels({'IPSC' ,'EPSC'});ylabel('TTX modulation index');set(gca,'FontSize',10);xtickangle(45);
 %% Show example IPSC TTX before after 
 temp=[];temp=find(pyr_washin==1);
 cnr=3
@@ -215,12 +219,13 @@ plot(Ephys(temp(cnr)).sub_traces_high(start:endp,3),'Color','k','LineWidth',1.5)
 hold on;plot(Ephys(temp(cnr)).sub_traces_highf(start:endp,2),'Color','b','LineWidth',1.5);set(gca,'box','off');
 hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 text(1500,-150,'TTX + 4AP');hold on;text(1500,285,'IPSC before','Color','b');
-axis off; set(gca,'FontSize',10);
+%axis off; 
+set(gca,'FontSize',10);
 % subplot(1,2,2)
 % plot(Ephys(temp(cnr)).sub_traces_high(start:endp,4),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
 % hold on;plot(Ephys(temp(cnr)).sub_traces_highf(start:endp,1),'Color','r','LineWidth',1.2);set(gca,'box','off');
 % hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
- %% alternative; just show middle frequency one with median 
+ %% E/I ration alternative; just show middle frequency one with median 
  edges = [0:0.25:2];
   fig4=figure;set(fig4, 'Position', [200, 200, 200, 200]);set(gcf,'color','w');
 hold on;h2=histogram(e_i_ratio_pyr_hf,edges,'Normalization','probability');h2.FaceColor='w';h2.EdgeColor='k';%h2.FaceAlpha=0.5;
@@ -699,6 +704,9 @@ hold on;xticks([1 2 3]);xticklabels({'PN','nFS','FS'});set(gca,'FontSize',10);
 %title('TTX + 4AP');
 ylabel('Max Slope');xtickangle(45);
 %% Show injected current vs spike frequency
+a=[];a=find(maxsF>freq_cutoff | pv_label==1);
+b=[];b=find(maxsF<freq_cutoff);
+c=[];c=find(maxsF<freq_cutoff | pv_label==1);
  fig4=figure;set(fig4, 'Position', [200, 600, 300, 300]);set(gcf,'color','w');
  for i=1:length(spikecount_in(a))
      p1=plot(stimvec_in{:,a(i)},spikecount_in{:,a(i)});p1.Color=[0.8500 0.3250 0.0980];p1.Color(4)=3/8;
@@ -730,6 +738,7 @@ legend({'FS', 'nFS','PN'});
 %% Intrinsic properties
 [rmp_pyr maxsp_pyr rheo_pyr rin_pyr tau_pyr sag_pyr trace_pyr spike_time_pyr] = passive_readout(Ephys,pyr_k);
 [rmp_in maxsp_in rheo_in rin_in tau_in sag_in trace_in spike_time_in] = passive_readout(Ephys,in_k);
+
 %% comparison 
 a=[];a=find(maxsF>50 | pv_label==1);
 b=[];b=find(maxsF<50);
@@ -766,12 +775,16 @@ g2=length(p1)+1:length(par);
 [statsout]=dual_boxplot(par,g1,g2,0);
 xlim([0 3]);ylabel('Membrane time constant (ms)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});xtickangle(45);
 %% Active parameters
-active_pyr=sp_parameters_pandora(trace_pyr,2);
-active_in=sp_parameters_pandora(trace_in,2);
+%first or second spike: first here: 
+spike_nr=1;
+active_pyr=sp_parameters_pandora(trace_pyr,spike_nr);
+active_in=sp_parameters_pandora(trace_in,spike_nr);
+ active_pyr(5,:)=active_pyr(5,:)*2;
+active_in(5,:)=active_in(5,:)*2;
 %% Subplots for active paramaters 
-par1=active_pyr([1 2 3 4 5 6 7 8 15],:);par2=active_in([1 2 3 4 5 6 7 8 15],a);
+par1=active_pyr([1 2 3 5 6 7 8 15],:);par2=active_in([1 2 3 5 6 7 8 15],a);
 color_id={[0 0 0],[0.8500 0.3250 0.0980]};
-str={'V_{min}(mV)','V_{peak}(mV)','V_{init}(mV)','V_{thresh}(mV)', 'Vslope_{max} (\DeltamV/\Deltams)','V_{half} (mV)','Spike_{amplitude} (mV)',...
+str={'V_{min}(mV)','V_{peak}(mV)','V_{thresh}(mV)', 'Vslope_{max} (\DeltamV/\Deltams)','V_{half} (mV)','Spike_{amplitude} (mV)',...
     'AHP_{max}(mV)','Spike_{half width} (ms)'};
 
 fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 500, 400, 500]);set(gcf,'color','w');
@@ -966,70 +979,9 @@ b=bar(2,gr_m(2));b.FaceColor='k';b.FaceAlpha=0.75;
 hold on;er=errorbar(1:2,gr_m,gr_sem);er.Color = [0 0 0];er.LineWidth=1;er.LineStyle = 'none'; hold on;
 xticks([1:1:2]);ylabel('Onset latency (ms)');xticklabels({'Cre+','Cre-'});xtickangle(45);set(gca,'FontSize',10);
 %% 
-
-
-
-
-
-
-
-%% Injected current vs Voltage 
+%% Stuff for Vahid
 a=[];a=find(maxsF>50 | pv_label==1);
 b=[];b=find(maxsF<50);
-for k=1:25
-    for i=1:length(spikecount_in(a))
-        try
-        s1(i)=spikecount_in{:,a(i)}(k);       
-        catch 
-         s1(i)=NaN;   
-        end
-    end
-    mean_fs(k)=nanmean(s1);
-end
-s1=[];
-for k=1:25
-    for i=1:length(spikecount_in(b))
-        try
-        s1(i)=spikecount_in{:,b(i)}(k);       
-        catch 
-         s1(i)=NaN;   
-        end
-    end
-    mean_nfs(k)=nanmean(s1);
-end
-s1=[];
-for k=1:25
-    for i=1:length(spikecount_pyr)
-        try
-        s1(i)=spikecount_pyr{:,i}(k);       
-        catch 
-         s1(i)=NaN;   
-        end
-    end
-    mean_pyr(k)=nanmean(s1);
-end
-%% 
-
- fig4=figure;set(fig4, 'Position', [200, 600, 600, 300]);set(gcf,'color','w');
- for i=1:length(spikecount_in(a))
-     p1=plot(stimvec_in{:,a(i)},spikecount_in{:,a(i)},'r', 'MarkerFaceColor','r');p1.Color(4)=3/8;
-     hold on;set(gca,'box','off');
- end
-hold on;
- for i=1:length(spikecount_in(b))
-     p1=plot(stimvec_in{:,b(i)},spikecount_in{:,b(i)},'m', 'MarkerFaceColor','m');p1.Color(4)=3/8;
-     hold on;set(gca,'box','off');
- end
-hold on;
-for i=1:length(spikecount_pyr)
-     p1=plot(stimvec_pyr{:,i},spikecount_pyr{:,i},'k', 'MarkerFaceColor','k');p1.Color(4)=3/8;
-     hold on;set(gca,'box','off');
-end
-ylabel('Spike frequency (Hz)');xlabel('Injected current (pA)')
-hold on;plot(stimvec_pyr{:,end},mean_fs,'r-o','LineWidth',3);
-hold on;plot(stimvec_pyr{:,end},mean_nfs,'m-o','LineWidth',3);
-hold on;plot(stimvec_pyr{:,end},mean_pyr,'k-o','LineWidth',3);
-%% 
 for i=1:length(spikecount_pyr);
 pyramidal_cells{:,i}=[stimvec_pyr{:,i}' spikecount_pyr{:,i}'];
 end
@@ -1039,157 +991,10 @@ end
 for i=1:length(spikecount_in(a));
 fast_interneuron{:,i}=[stimvec_in{:,a(i)}' spikecount_in{:,a(i)}'];
 end
-%% 
 data_gain.pyramidal_cells=pyramidal_cells;
 data_gain.nonfast_interneuron=nonfast_interneuron;
 data_gain.fast_interneuron=fast_interneuron;
-%% TTX wash in 
-all_cs_ttx = cell_selecter(Ephys,'sol',2,'drugs',1);
-temp=[];
-temp=find(all_cs_ttx==1);
-cnr=3
-ov_min=-20;ov_max=300;
-fig4=figure;set(fig4, 'Position', [200, 800, 400, 200]);set(gcf,'color','w');
-subplot(1,2,1)
-plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,3),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
-hold on;plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,2),'Color','b','LineWidth',1.2);set(gca,'box','off');
-hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
-subplot(1,2,2)
-plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,4),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
-hold on;plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,1),'Color','r','LineWidth',1.2);set(gca,'box','off');
-hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
-%% IPSC quantification
-cl={'b',[0.5 0.5 0.5]};
-ttx_ipsc=[max(abs(Ephys(temp(3)).highf_p(:,2))) max(abs(Ephys(temp(3)).highf_p(:,3)));...
-    max(abs(Ephys(temp(2)).highf_p(:,2))) max(abs(Ephys(temp(2)).highf_p(:,3)));...
-  max(abs(Ephys(temp(1)).highf_p(:,1))) max(abs(Ephys(temp(1)).highf_p(:,3))) ];
-data=[];data=ttx_ipsc;
-fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 300, 200, 200]);set(gcf,'color','w');
-hold on;
-for i=1:length(data)
-     pl=plot([1,2],[data(:,1),data(:,2)],'color','k');    
-end
-hold on;pS=plotSpread([data(:,1),data(:,2)],'categoryIdx',[ones(1,length(data(:,1)))' ones(1,length(data(:,2)))'*2],...
-    'categoryMarkers',{'o','o'},'categoryColors',cl);hold on;
-box off;set(gca,'FontSize',10);
- [p1]=signrank(data(:,1) ,data(:,2));p1=round(p1,3);
-title([' p=' num2str(p1) ', n=' num2str(length(data))],'FontWeight','Normal');
-xticklabels({'no TTX','TTX'});ylabel('IPSC amplitude (pA)');set(gca,'FontSize',10);
-%% EPSC
-ttx_epsc=[max(abs(Ephys(temp(3)).highf_n(:,1))) max(abs(Ephys(temp(3)).highf_n(:,4)));...
-    max(abs(Ephys(temp(2)).highf_n(:,1))) max(abs(Ephys(temp(2)).highf_n(:,4)));...
-  max(abs(Ephys(temp(1)).highf_n(:,3))) max(abs(Ephys(temp(1)).highf_n(:,4))) ];
-data=[];data=ttx_epsc;
-fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 300, 200, 200]);set(gcf,'color','w');
-hold on;
-for i=1:length(data)
-     pl=plot([1,2],[data(:,1),data(:,2)],'color','k');    
-end
-hold on;pS=plotSpread([data(:,1),data(:,2)],'categoryIdx',[ones(1,length(data(:,1)))' ones(1,length(data(:,2)))'*2],...
-    'categoryMarkers',{'o','o'},'categoryColors',cl);hold on;
-box off;set(gca,'FontSize',10);
- [p1]=signrank(data(:,1) ,data(:,2));p1=round(p1,3);
-title([' p=' num2str(p1) ', n=' num2str(length(data))],'FontWeight','Normal');
-xticklabels({'no TTX','TTX'});ylabel('IPSC amplitude (pA)');set(gca,'FontSize',10);
-%% TTX modulation index
-par=[(ttx_ipsc(:,2)-ttx_ipsc(:,1))./(ttx_ipsc(:,2)+ttx_ipsc(:,1)); (ttx_epsc(:,2)-ttx_epsc(:,1))./(ttx_epsc(:,2)+ttx_epsc(:,1))]
-s1=[1:3];s2=[4:6]
-[statsout]=dual_barplot(par,s1,s2,2);xticks([1:1:2]);hold on;xticklabels({'IPSC' ,'EPSC'});ylabel('TTX modulation index');set(gca,'FontSize',10);xtickangle(45);
-%% 
-all_red=[];all_nred=[];
-all_red = cell_selecter(Ephys,'label',1,'pair',1,'geno',7);
-all_nred = cell_selecter(Ephys,'label',0,'pair',1,'geno',7);
-%% 
-all_red=[];all_nred=[];
-all_red = cell_selecter(Ephys,'label',1,'geno',7);
-all_nred = cell_selecter(Ephys,'label',0,'geno',7);
-%% 
-red_epsc=[];red_epscf=[];nred_epsc=[];nred_epscf=[];
-temp=[];
-for i=1:length(find(all_red==1));
-   temp=find(all_red==1);
-   red_epsc(i)=max(abs(Ephys(temp(i)).train_n(:)));
-end
-temp=[];
-   for i=1:length(find(all_nred==1));
-   temp=find(all_nred==1);
-   nred_epsc(i)=max(abs(Ephys(temp(i)).train_n(:)));
-   end
-   
-temp=[];
-for i=1:length(find(all_red==1));
-   temp=find(all_red==1);
-   red_epscf(i)=max(abs(Ephys(temp(i)).high_n(:)));
-end
-temp=[];
-   for i=1:length(find(all_nred==1));
-   temp=find(all_nred==1);
-   nred_epscf(i)=max(abs(Ephys(temp(i)).high_n(:)));
-   end
-   
-%    temp=[];
-% for i=1:length(find(all_red==1));
-%    temp=find(all_red==1);
-%    red_epschf(i)=max(abs(Ephys(temp(i)).highf_n(:)));
-% end
-% temp=[];
-%    for i=1:length(find(all_nred==1));
-%    temp=find(all_nred==1);
-%    nred_epschf(i)=max(abs(Ephys(temp(i)).highf_n(:)));
-%    end
-   
-   %% All against all
-   par=[red_epsc nred_epsc]
-   s1=1:length(red_epsc)
-   s2=length(red_epsc)+1:length(nred_epsc)+length(red_epsc)
-  [statsout]=dual_barplot(par,s1,s2,0);xticks([1:1:2]);hold on;xticklabels({'Cre+' ,'Cre-'});ylabel('EPSC Amplitude (pA)');set(gca,'FontSize',10);xtickangle(45);
 
-%% only using pairs
-cl={'r',[0.5 0.5 0.5]};
-data=[];data=[red_epscf' nred_epscf'];
-fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 300, 200, 200]);set(gcf,'color','w');
-hold on;
-for i=1:length(data)
-     pl=plot([1,2],[data(:,1),data(:,2)],'color','k');    
-end
-
-hold on;pS=plotSpread([data(:,1),data(:,2)],'categoryIdx',[ones(1,length(data(:,1)))' ones(1,length(data(:,2)))'*2],...
-    'categoryMarkers',{'o','o'},'categoryColors',cl);hold on;
-%hold on;plot([1,2],[nanmedian(data(:,1)),nanmedian(data(:,2))],'k','LineWidth',3);
-%hold on;plot([1,2],[nanmean(data(:,1)),nanmean(data(:,2))],'k','LineWidth',3);
-box off;set(gca,'FontSize',10);
-%hold on;errorbar([0.75 2.25],nanmean(data),nanstd(data,[],1)/sqrt(length(data)),'ok','MarkerFaceColor','r','Markersize',7);
-hold on;errorbar([0.75],nanmean(data(:,1)),nanstd(data(:,1),[],1)/sqrt(length(data(:,1))),'ok','MarkerFaceColor','r','Markersize',7);
-hold on;errorbar([2.25],nanmean(data(:,2)),nanstd(data(:,2),[],1)/sqrt(length(data(:,1))),'ok','MarkerFaceColor',[0.5 0.5 0.5],'Markersize',7);
- [p1]=signrank(data(:,1) ,data(:,2));p1=round(p1,3);
-title([' p=' num2str(p1) ', n=' num2str(length(data))],'FontWeight','Normal');
-xticklabels({'Cre+','Cre-'});ylabel('EPSC Amplitude (pA)');set(gca,'FontSize',10);
-
-%% 
-
-cnr=6
-ov_min=-400;ov_max=600;
-temp=[];
-temp=find(all_red==1);
-fig4=figure;set(fig4, 'Position', [200, 200, 600, 300]);set(gcf,'color','w');
-subplot(1,2,1)
-plot(Ephys(temp(cnr)).sub_traces_high(1:2*sr,1),'Color','r','LineWidth',1);set(gca,'box','off');
-ylim([-200 20])
-ov_min=-400;ov_max=600;
-title('Cre+')
-temp=[];
-temp=find(all_nred==1);
-subplot(1,2,2)
-
-plot(Ephys(temp(cnr)).sub_traces_high(1:2*sr,1),'Color',[0.5 0.5 0.5],'LineWidth',1);set(gca,'box','off');
-ylim([-200 20])
-title('Cre-')
-%% 
-
- plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','r','LineWidth',1);set(gca,'box','off');
-hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
-hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
-% %% 
 %% Read out Rheobase for Vahid
 temp=[];temp=find(pyr_k==1);
 for i=1:length(temp)
@@ -1227,6 +1032,224 @@ rheo_current_in(i,:)=Ephys(temp(i)).Rheobase.stimvec(1:20);
     end
 end
 
+%% 
+rheobase.pn_current=rheo_current_pn;
+rheobase.pn_spikecount=rheo_spikecount_pn;
+rheobase.nonfast_current=rheo_current_in(b,:);
+rheobase.nonfast_spikecount=rheo_spikecount_in(b,:);
+rheobase.fast_current=rheo_current_in(a,:);
+rheobase.fast_spikecount=rheo_spikecount_in(a,:);
+%% 
+
+
+
+
+% %% Injected current vs Voltage 
+% a=[];a=find(maxsF>50 | pv_label==1);
+% b=[];b=find(maxsF<50);
+% for k=1:25
+%     for i=1:length(spikecount_in(a))
+%         try
+%         s1(i)=spikecount_in{:,a(i)}(k);       
+%         catch 
+%          s1(i)=NaN;   
+%         end
+%     end
+%     mean_fs(k)=nanmean(s1);
+% end
+% s1=[];
+% for k=1:25
+%     for i=1:length(spikecount_in(b))
+%         try
+%         s1(i)=spikecount_in{:,b(i)}(k);       
+%         catch 
+%          s1(i)=NaN;   
+%         end
+%     end
+%     mean_nfs(k)=nanmean(s1);
+% end
+% s1=[];
+% for k=1:25
+%     for i=1:length(spikecount_pyr)
+%         try
+%         s1(i)=spikecount_pyr{:,i}(k);       
+%         catch 
+%          s1(i)=NaN;   
+%         end
+%     end
+%     mean_pyr(k)=nanmean(s1);
+% end
+% %% 
+% 
+%  fig4=figure;set(fig4, 'Position', [200, 600, 600, 300]);set(gcf,'color','w');
+%  for i=1:length(spikecount_in(a))
+%      p1=plot(stimvec_in{:,a(i)},spikecount_in{:,a(i)},'r', 'MarkerFaceColor','r');p1.Color(4)=3/8;
+%      hold on;set(gca,'box','off');
+%  end
+% hold on;
+%  for i=1:length(spikecount_in(b))
+%      p1=plot(stimvec_in{:,b(i)},spikecount_in{:,b(i)},'m', 'MarkerFaceColor','m');p1.Color(4)=3/8;
+%      hold on;set(gca,'box','off');
+%  end
+% hold on;
+% for i=1:length(spikecount_pyr)
+%      p1=plot(stimvec_pyr{:,i},spikecount_pyr{:,i},'k', 'MarkerFaceColor','k');p1.Color(4)=3/8;
+%      hold on;set(gca,'box','off');
+% end
+% ylabel('Spike frequency (Hz)');xlabel('Injected current (pA)')
+% hold on;plot(stimvec_pyr{:,end},mean_fs,'r-o','LineWidth',3);
+% hold on;plot(stimvec_pyr{:,end},mean_nfs,'m-o','LineWidth',3);
+% hold on;plot(stimvec_pyr{:,end},mean_pyr,'k-o','LineWidth',3);
+%% 
+
+% %% TTX wash in 
+% all_cs_ttx = cell_selecter(Ephys,'sol',2,'drugs',1);
+% temp=[];
+% temp=find(all_cs_ttx==1);
+% cnr=3
+% ov_min=-20;ov_max=300;
+% fig4=figure;set(fig4, 'Position', [200, 800, 400, 200]);set(gcf,'color','w');
+% subplot(1,2,1)
+% plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,3),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
+% hold on;plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,2),'Color','b','LineWidth',1.2);set(gca,'box','off');
+% hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+% subplot(1,2,2)
+% plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,4),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
+% hold on;plot(Ephys(temp(cnr)).sub_traces_highf(1:1*sr,1),'Color','r','LineWidth',1.2);set(gca,'box','off');
+% hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+% %% IPSC quantification
+% cl={'b',[0.5 0.5 0.5]};
+% ttx_ipsc=[max(abs(Ephys(temp(3)).highf_p(:,2))) max(abs(Ephys(temp(3)).highf_p(:,3)));...
+%     max(abs(Ephys(temp(2)).highf_p(:,2))) max(abs(Ephys(temp(2)).highf_p(:,3)));...
+%   max(abs(Ephys(temp(1)).highf_p(:,1))) max(abs(Ephys(temp(1)).highf_p(:,3))) ];
+% data=[];data=ttx_ipsc;
+% fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 300, 200, 200]);set(gcf,'color','w');
+% hold on;
+% for i=1:length(data)
+%      pl=plot([1,2],[data(:,1),data(:,2)],'color','k');    
+% end
+% hold on;pS=plotSpread([data(:,1),data(:,2)],'categoryIdx',[ones(1,length(data(:,1)))' ones(1,length(data(:,2)))'*2],...
+%     'categoryMarkers',{'o','o'},'categoryColors',cl);hold on;
+% box off;set(gca,'FontSize',10);
+%  [p1]=signrank(data(:,1) ,data(:,2));p1=round(p1,3);
+% title([' p=' num2str(p1) ', n=' num2str(length(data))],'FontWeight','Normal');
+% xticklabels({'no TTX','TTX'});ylabel('IPSC amplitude (pA)');set(gca,'FontSize',10);
+% %% EPSC
+% ttx_epsc=[max(abs(Ephys(temp(3)).highf_n(:,1))) max(abs(Ephys(temp(3)).highf_n(:,4)));...
+%     max(abs(Ephys(temp(2)).highf_n(:,1))) max(abs(Ephys(temp(2)).highf_n(:,4)));...
+%   max(abs(Ephys(temp(1)).highf_n(:,3))) max(abs(Ephys(temp(1)).highf_n(:,4))) ];
+% data=[];data=ttx_epsc;
+% fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 300, 200, 200]);set(gcf,'color','w');
+% hold on;
+% for i=1:length(data)
+%      pl=plot([1,2],[data(:,1),data(:,2)],'color','k');    
+% end
+% hold on;pS=plotSpread([data(:,1),data(:,2)],'categoryIdx',[ones(1,length(data(:,1)))' ones(1,length(data(:,2)))'*2],...
+%     'categoryMarkers',{'o','o'},'categoryColors',cl);hold on;
+% box off;set(gca,'FontSize',10);
+%  [p1]=signrank(data(:,1) ,data(:,2));p1=round(p1,3);
+% title([' p=' num2str(p1) ', n=' num2str(length(data))],'FontWeight','Normal');
+% xticklabels({'no TTX','TTX'});ylabel('IPSC amplitude (pA)');set(gca,'FontSize',10);
+% %% TTX modulation index
+% par=[(ttx_ipsc(:,2)-ttx_ipsc(:,1))./(ttx_ipsc(:,2)+ttx_ipsc(:,1)); (ttx_epsc(:,2)-ttx_epsc(:,1))./(ttx_epsc(:,2)+ttx_epsc(:,1))]
+% s1=[1:3];s2=[4:6]
+% [statsout]=dual_barplot(par,s1,s2,2);xticks([1:1:2]);hold on;xticklabels({'IPSC' ,'EPSC'});ylabel('TTX modulation index');set(gca,'FontSize',10);xtickangle(45);
+% %% 
+% all_red=[];all_nred=[];
+% all_red = cell_selecter(Ephys,'label',1,'pair',1,'geno',7);
+% all_nred = cell_selecter(Ephys,'label',0,'pair',1,'geno',7);
+% %% 
+% all_red=[];all_nred=[];
+% all_red = cell_selecter(Ephys,'label',1,'geno',7);
+% all_nred = cell_selecter(Ephys,'label',0,'geno',7);
+% %% 
+% red_epsc=[];red_epscf=[];nred_epsc=[];nred_epscf=[];
+% temp=[];
+% for i=1:length(find(all_red==1));
+%    temp=find(all_red==1);
+%    red_epsc(i)=max(abs(Ephys(temp(i)).train_n(:)));
+% end
+% temp=[];
+%    for i=1:length(find(all_nred==1));
+%    temp=find(all_nred==1);
+%    nred_epsc(i)=max(abs(Ephys(temp(i)).train_n(:)));
+%    end
+%    
+% temp=[];
+% for i=1:length(find(all_red==1));
+%    temp=find(all_red==1);
+%    red_epscf(i)=max(abs(Ephys(temp(i)).high_n(:)));
+% end
+% temp=[];
+%    for i=1:length(find(all_nred==1));
+%    temp=find(all_nred==1);
+%    nred_epscf(i)=max(abs(Ephys(temp(i)).high_n(:)));
+%    end
+%    
+% %    temp=[];
+% % for i=1:length(find(all_red==1));
+% %    temp=find(all_red==1);
+% %    red_epschf(i)=max(abs(Ephys(temp(i)).highf_n(:)));
+% % end
+% % temp=[];
+% %    for i=1:length(find(all_nred==1));
+% %    temp=find(all_nred==1);
+% %    nred_epschf(i)=max(abs(Ephys(temp(i)).highf_n(:)));
+% %    end
+%    
+%    %% All against all
+%    par=[red_epsc nred_epsc]
+%    s1=1:length(red_epsc)
+%    s2=length(red_epsc)+1:length(nred_epsc)+length(red_epsc)
+%   [statsout]=dual_barplot(par,s1,s2,0);xticks([1:1:2]);hold on;xticklabels({'Cre+' ,'Cre-'});ylabel('EPSC Amplitude (pA)');set(gca,'FontSize',10);xtickangle(45);
+% 
+% %% only using pairs
+% cl={'r',[0.5 0.5 0.5]};
+% data=[];data=[red_epscf' nred_epscf'];
+% fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 300, 200, 200]);set(gcf,'color','w');
+% hold on;
+% for i=1:length(data)
+%      pl=plot([1,2],[data(:,1),data(:,2)],'color','k');    
+% end
+% 
+% hold on;pS=plotSpread([data(:,1),data(:,2)],'categoryIdx',[ones(1,length(data(:,1)))' ones(1,length(data(:,2)))'*2],...
+%     'categoryMarkers',{'o','o'},'categoryColors',cl);hold on;
+% %hold on;plot([1,2],[nanmedian(data(:,1)),nanmedian(data(:,2))],'k','LineWidth',3);
+% %hold on;plot([1,2],[nanmean(data(:,1)),nanmean(data(:,2))],'k','LineWidth',3);
+% box off;set(gca,'FontSize',10);
+% %hold on;errorbar([0.75 2.25],nanmean(data),nanstd(data,[],1)/sqrt(length(data)),'ok','MarkerFaceColor','r','Markersize',7);
+% hold on;errorbar([0.75],nanmean(data(:,1)),nanstd(data(:,1),[],1)/sqrt(length(data(:,1))),'ok','MarkerFaceColor','r','Markersize',7);
+% hold on;errorbar([2.25],nanmean(data(:,2)),nanstd(data(:,2),[],1)/sqrt(length(data(:,1))),'ok','MarkerFaceColor',[0.5 0.5 0.5],'Markersize',7);
+%  [p1]=signrank(data(:,1) ,data(:,2));p1=round(p1,3);
+% title([' p=' num2str(p1) ', n=' num2str(length(data))],'FontWeight','Normal');
+% xticklabels({'Cre+','Cre-'});ylabel('EPSC Amplitude (pA)');set(gca,'FontSize',10);
+% 
+% %% 
+% 
+% cnr=6
+% ov_min=-400;ov_max=600;
+% temp=[];
+% temp=find(all_red==1);
+% fig4=figure;set(fig4, 'Position', [200, 200, 600, 300]);set(gcf,'color','w');
+% subplot(1,2,1)
+% plot(Ephys(temp(cnr)).sub_traces_high(1:2*sr,1),'Color','r','LineWidth',1);set(gca,'box','off');
+% ylim([-200 20])
+% ov_min=-400;ov_max=600;
+% title('Cre+')
+% temp=[];
+% temp=find(all_nred==1);
+% subplot(1,2,2)
+% 
+% plot(Ephys(temp(cnr)).sub_traces_high(1:2*sr,1),'Color',[0.5 0.5 0.5],'LineWidth',1);set(gca,'box','off');
+% ylim([-200 20])
+% title('Cre-')
+% %% 
+% 
+%  plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,2),'Color','r','LineWidth',1);set(gca,'box','off');
+% hold on;plot(Ephys(temp(cnr)).sub_traces_train(1:1*sr,1),'Color','b','LineWidth',1);set(gca,'box','off');hold on;ylim([ov_min-10 ov_max]);   
+% hold on;plot([0.25*sr 0.25*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+% % %% 
+
 
 %% 
 temp=[];temp=find(pyr_k==1);
@@ -1252,9 +1275,3 @@ g2=length(p1)+1:length(par);
 xlim([0 3]);ylabel('Threshold current (pA)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});xtickangle(45);
 %% 
 
-rheobase.pn_current=rheo_current_pn;
-rheobase.pn_spikecount=rheo_spikecount_pn;
-rheobase.nonfast_current=rheo_current_in(b,:);
-rheobase.nonfast_spikecount=rheo_spikecount_in(b,:);
-rheobase.fast_current=rheo_current_in(a,:);
-rheobase.fast_spikecount=rheo_spikecount_in(a,:);
