@@ -115,11 +115,11 @@ end
 in_k=sum(temp2);
 
 %%  Read put peaks from train for PN cs for train (long), middle frequency (high), highest (highf)
-[epsc_pyr_long ipsc_pyr_long e_i_pyr_train] = readout_amp(Ephys,pyr_cs ,1,2);
-[epsc_pyr_hf ipsc_pyr_hf e_i_ratio_pyr_hf] = readout_amp(Ephys,pyr_cs ,2,2);
-[epsc_pyr_hf2 ipsc_pyr_hf2 e_i_ratio_pyr_hf2] = readout_amp(Ephys,pyr_cs ,3,2);
+[epsc_pyr_long ipsc_pyr_long e_i_pyr_train] = readout_amp(Ephys,pyr_cs ,1,2,1,2);
+[epsc_pyr_hf ipsc_pyr_hf e_i_ratio_pyr_hf] = readout_amp(Ephys,pyr_cs ,2,2,1,2);
+[epsc_pyr_hf2 ipsc_pyr_hf2 e_i_ratio_pyr_hf2] = readout_amp(Ephys,pyr_cs ,3,2,1,2);
 %anothe rname for train 
-[epsc_pyr_long ipsc_pyr_long e_i_ratio_pyr_long] = readout_amp(Ephys,pyr_cs ,1,2);
+[epsc_pyr_long ipsc_pyr_long e_i_ratio_pyr_long] = readout_amp(Ephys,pyr_cs ,1,2,1,2);
 %% Time to peak ex and in for retro cells using first pulse of long train 
 temp=[];t_ex=[];t_in=[];t_in_ex=[];trace_smooth_ex=[];trace_smooth_in=[];
 temp=find(pyr_cs==1);
@@ -149,6 +149,7 @@ close all;
 t_in_ex(30)=NaN;
 t_ex(30)=NaN;
 t_in(34)=NaN;
+
 %% Main Figure panel c plot EPSC and ISPC example  
 cnr=23 %210914SW0002 (nonlabelled cs solution, no drugs)
 ov_min=-400;ov_max=600;temp=[];temp=find(pyr_cs==1);
@@ -175,7 +176,12 @@ cl={'r','b'};
 data=[];data=t_ein;;
 paired_plot_box(data,cl);
 xticklabels({'EX','IN'});ylabel('Onset Latency (ms)');set(gca,'FontSize',10);
+%statistics 
+%test for normality: 
+kstest(t_ex_sub')
+kstest(t_in_sub')
 %pvalue of paired signrank test:  4.8828e-04
+[p1]=signrank(t_ein(:,1),t_ein(:,2))
 %% %% TTX modulation index for PN ; not happy with readout
 temp=[];temp=find(pyr_washin==1);ttx_ipsc=[];ttx_epsc=[];
 
@@ -229,7 +235,7 @@ set(gca,'FontSize',10);
  edges = [0:0.25:2];
   fig4=figure;set(fig4, 'Position', [200, 200, 200, 200]);set(gcf,'color','w');
 hold on;h2=histogram(e_i_ratio_pyr_hf,edges,'Normalization','probability');h2.FaceColor='w';h2.EdgeColor='k';%h2.FaceAlpha=0.5;
- box off;xlabel({'E / I ratio' ; '(25 Hz stim freq.)'});ylabel('Relative counts');
+ box off;xlabel({'E / I ratio' ; '(5 Hz stim freq.)'});ylabel('Relative counts');
  hold on;plot([1 1],[0 0.4],'--k');
  hold on;plot([nanmedian(e_i_ratio_pyr_hf(~isinf(e_i_ratio_pyr_hf))) nanmedian(e_i_ratio_pyr_hf(~isinf(e_i_ratio_pyr_hf)))],[0.4 0.4],...
      'Marker','v','MarkerFaceColor','k','MarkerEdgeColor','k');
@@ -256,7 +262,7 @@ hold on;er=errorbar(1:3,gr_m,gr_sem);er.Color = [0 0 0];er.LineWidth=1;er.LineSt
 text(0.7,0.1,num2str(length(e_i_ratio_pyr_long(a1))),'Color','w');hold on;
 text(1.7,0.1,num2str(length(e_i_ratio_pyr_hf(a2))),'Color','w');hold on;
 text(2.7,0.1,num2str(length(e_i_ratio_pyr_hf2(a3))),'Color','w');hold on;
-xticks([1:1:3]);ylabel('E / I ratio');xticklabels({'1 Hz','25 Hz','50 Hz'});xtickangle(45);set(gca,'FontSize',10);
+xticks([1:1:3]);ylabel('E / I ratio');xticklabels({'1 Hz','5 Hz','10 Hz'});xtickangle(45);set(gca,'FontSize',10);
 %% 
 
 %% SPIKING or not PYR vs nonFS and FS
