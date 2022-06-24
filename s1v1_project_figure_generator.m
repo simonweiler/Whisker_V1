@@ -114,11 +114,11 @@ temp2(i,:) = cell_selecter(Ephys,'label',lab(i),'sol',1);
 end
 in_k=sum(temp2);
 
-%%  Read put peaks from train for PN cs for train (long), middle frequency (high), highest (highf)
+%%  Read out peaks from train for PN cs for train (long), middle frequency (high), highest (highf)
 [epsc_pyr_long ipsc_pyr_long e_i_pyr_train] = readout_amp(Ephys,pyr_cs ,1,2,1,2);
 [epsc_pyr_hf ipsc_pyr_hf e_i_ratio_pyr_hf] = readout_amp(Ephys,pyr_cs ,2,2,1,2);
 [epsc_pyr_hf2 ipsc_pyr_hf2 e_i_ratio_pyr_hf2] = readout_amp(Ephys,pyr_cs ,3,2,1,2);
-%anothe rname for train 
+%another name for train 
 [epsc_pyr_long ipsc_pyr_long e_i_ratio_pyr_long] = readout_amp(Ephys,pyr_cs ,1,2,1,2);
 %% Time to peak ex and in for retro cells using first pulse of long train 
 temp=[];t_ex=[];t_in=[];t_in_ex=[];trace_smooth_ex=[];trace_smooth_in=[];
@@ -178,11 +178,11 @@ paired_plot_box(data,cl);
 xticklabels({'EX','IN'});ylabel('Onset Latency (ms)');set(gca,'FontSize',10);
 %statistics 
 %test for normality: 
-kstest(t_ex_sub')
-kstest(t_in_sub')
+kstest(t_ex_sub');
+kstest(t_in_sub');
 %pvalue of paired signrank test:  4.8828e-04
-[p1]=signrank(t_ein(:,1),t_ein(:,2))
-%% %% TTX modulation index for PN ; not happy with readout
+[p1]=signrank(t_ein(:,1),t_ein(:,2));
+%% %% TTX modulation index for PN ; not happy with readout; double check 
 temp=[];temp=find(pyr_washin==1);ttx_ipsc=[];ttx_epsc=[];
 
 ttx_ipsc=[max(abs(Ephys(temp(1)).high_p(1:2,2))) max(abs(Ephys(temp(1)).high_p(1:2,3)));...
@@ -215,7 +215,7 @@ yticks([0:100:300]);
 % xticklabels({'IPSC' ,'EPSC'});ylabel('TTX modulation index');set(gca,'FontSize',10);xtickangle(45);
 %% Show example IPSC TTX before after 
 temp=[];temp=find(pyr_washin==1);
-cnr=3
+cnr=3;
 ov_min=-20;ov_max=300;
 start=4000;
 endp=8000;
@@ -232,12 +232,15 @@ set(gca,'FontSize',10);
 % hold on;plot(Ephys(temp(cnr)).sub_traces_highf(start:endp,1),'Color','r','LineWidth',1.2);set(gca,'box','off');
 % hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
  %% E/I ration alternative; just show middle frequency one with median 
+% sig_elong =[];sig_ehf = []; sig_ehf2=[];
+%  sig_elong+sig_ehf+sig_ehf2
+
  edges = [0:0.25:2];
   fig4=figure;set(fig4, 'Position', [200, 200, 200, 200]);set(gcf,'color','w');
 hold on;h2=histogram(e_i_ratio_pyr_hf,edges,'Normalization','probability');h2.FaceColor='w';h2.EdgeColor='k';%h2.FaceAlpha=0.5;
- box off;xlabel({'E / I ratio' ; '(5 Hz stim freq.)'});ylabel('Relative counts');
- hold on;plot([1 1],[0 0.4],'--k');
- hold on;plot([nanmedian(e_i_ratio_pyr_hf(~isinf(e_i_ratio_pyr_hf))) nanmedian(e_i_ratio_pyr_hf(~isinf(e_i_ratio_pyr_hf)))],[0.4 0.4],...
+ box off;xlabel({'E / I ratio' ; '(5 Hz stim freq.)'});ylabel('Relative counts');ylim([0 0.6]);
+ hold on;plot([1 1],[0 0.5],'--k');
+ hold on;plot([nanmedian(e_i_ratio_pyr_hf(~isinf(e_i_ratio_pyr_hf))) nanmedian(e_i_ratio_pyr_hf(~isinf(e_i_ratio_pyr_hf)))],[0.5 0.5],...
      'Marker','v','MarkerFaceColor','k','MarkerEdgeColor','k');
  %title('25 Hz stim freq.','FontWeight','Normal');
  set(gca,'FontSize',10);
@@ -270,6 +273,14 @@ xticks([1:1:3]);ylabel('E / I ratio');xticklabels({'1 Hz','5 Hz','10 Hz'});xtick
 epsp_pyr=[];epsp_in=[];
 [epsp_pyr] = readout_amp_epsp(Ephys,pyr_k ,2,sr);
 [epsp_in] = readout_amp_epsp(Ephys,in_k ,2,sr);
+% 
+% epsp_pyr_long=[];epsp_in_long=[];
+% [epsp_pyr_long] = readout_amp_epsp(Ephys,pyr_k ,1,sr);
+% [epsp_in_long] = readout_amp_epsp(Ephys,in_k ,1,sr);
+% 
+% epsp_pyr_hf2=[];epsp_in_hf2=[];
+% [epsp_pyr_hf2] = readout_amp_epsp(Ephys,pyr_k ,3,sr);
+% [epsp_in_hf2] = readout_amp_epsp(Ephys,in_k ,3,sr);
 
 temp=[];maxsF=[];
 temp=find(in_k==1);
@@ -306,14 +317,16 @@ for t=1:length(Ephys(43).IV.stimvec)
 end
 spikecount_in{1, 1}=spikecount_43;
 maxsF(1)=max(spikecount_43);
+maxsF(1)=NaN;
+maxsF(11)=NaN;
 %% Plot histograms for spike frequency 
   edges = [0:8:100];
   fig4=figure;set(fig4, 'Position', [200, 200, 200, 200]);set(gcf,'color','w');
-  hold on;h2=histogram(maxsF_pyr,edges);h2.FaceColor='k';h2.EdgeColor='k';%h2.FaceAlpha=0.5;
-hold on;h2=histogram(maxsF,edges);h2.FaceColor=[0.8 0.8 0.8];h2.EdgeColor='k';%h2.FaceAlpha=0.5;
- box off;xlabel('Max. spike frequency (Hz)');ylabel('Counts');xlim([0 100]);set(gca,'FontSize',10);
+  hold on;h2=histogram(maxsF_pyr,edges,'Normalization','probability');h2.FaceColor='k';h2.EdgeColor='k';%h2.FaceAlpha=0.5;
+hold on;h2=histogram(maxsF,edges,'Normalization','probability');h2.FaceColor=[0.8 0.8 0.8];h2.EdgeColor='k';%h2.FaceAlpha=0.5;
+ box off;xlabel('Max. spike frequency (Hz)');ylabel('Rleative Counts');xlim([0 100]);set(gca,'FontSize',10);
 legend({'PN','IN'});legend boxoff
-%% Classify IN cells based on Fast spiking or not 
+%% Classify IN cells based on Fast spiking or not using HCA
 temp=[];temp=maxsF;
 temp(find(isnan(temp)))=[];
 [idx_input_ward, clustering_input, leafOrder] = hca([temp'],0,'ward',2,maxsF',3,0.6);
@@ -348,7 +361,7 @@ plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color',[0.8500 0.3250 0.0980],'L
 %hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 %end
 ylim([ov_min-10 ov_max]);title('FS IN','Color',[0.8500 0.3250 0.0980]);
-axis off;
+%axis off;
 %% showing EPSPs across three gropus
 %using a cutoff of 50 Hz
 freq_cutoff=50;
@@ -372,12 +385,12 @@ e.Color = '#A2142F';e.CapSize = 10;
 e.Color = [0.8500 0.3250 0.0980];e.CapSize = 10;
  hold on;plot([2.6 3.4],[nanmean(temp(find(temp<50))) nanmean(temp(find(temp<50)))],'Color',[0.8500 0.3250 0.0980]);
   hold on;p=plot([0 4],[50 50],':k');
- xlim([0 4]);xticks([1:1:3]);ylabel('EPSP amplitude (mV)');xticklabels({'PN','nFS IN','FS IN'});xtickangle(45);
+ xlim([0 4]);xticks([1:1:3]);ylabel('Light evoked EPSP amplitude (mV)');xticklabels({'PN','nFS IN','FS IN'});xtickangle(45);
  set(gca,'FontSize',10);
  %ylim([0 35])
  breakyaxis([35 65]);
 %% fraction of spikers for PN, nFSIN, FS IN
-spike_FS=sum(epsp_in>freq_cutoff)/(sum(maxsF>freq_cutoff));
+spike_FS=nansum(epsp_in(a)>freq_cutoff)/(length(a));
 spike_nFS=0;
 spike_PYR=nansum(epsp_pyr>freq_cutoff)/length((epsp_pyr));
 fig6= figure;set(fig6, 'Name', 'compare fraction spiking');set(fig6, 'Position', [200, 300, 150, 250]);set(gcf,'color','w');
@@ -396,7 +409,7 @@ ylim([0 1]);
 % scatter(maxsF_pyr,epsp_pyr,25,'o','MarkerEdgeColor','k','MarkerFaceColor','k');hold on;
 % scatter(maxsF,epsp_in,25,'o','MarkerEdgeColor','k','MarkerFaceColor',[0.8500 0.3250 0.0980]);
 % ylabel('EPSP amplitude (mV)');xlabel('max Spike frequency (Hz)');legend({'PYR','IN'}); set(gca,'FontSize',10);legend boxoff
-%% compare input to PV and PN: Is input the same or different (under tow conditions: NO TTX 4ap or with TTX 4AP)
+%% compare input to PV and PN: Is input the same or different (under two conditions: NO TTX 4ap or with TTX 4AP)
 %Readout peaks for 
 [epsc_pyr ipsc_pyr e_i_ratio_pyr] = readout_amp(Ephys,pyr_cs_pv ,2,2);
 [epsc_pv ipsc_pv e_i_ratio_pv] = readout_amp(Ephys,pv_cs_pv ,2,2);
@@ -443,7 +456,8 @@ data=[];data=[epsc_pyr_ttx'  epsc_pv_ttx'];
 cl={'k',[0.8500 0.3250 0.0980]};
 paired_plot_box(data,cl);hold on;xticklabels({'PN','PV'});set(gca,'FontSize',10);
 title('TTX + 4AP');ylim([0 1000]);
-set(gca,'ytick',[]);%ylabel('EPSC Amplitude (pA)')
+%set(gca,'ytick',[]);
+ylabel('EPSC Amplitude (pA)')
 %% show example trace without TTX (I think that is fair)
 %PN
 cnr=2;%
@@ -475,6 +489,7 @@ plot(Ephys(temp(cnr)).sub_traces_high(range,1),'Color',[0.8500 0.3250 0.0980],'L
 hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 % end
 ylim([ov_min-10 ov_max]);title('PV','Color',[0.8500 0.3250 0.0980]);
+axis off;
 % 
 
 %% Same input leads to spiking in one cell but not the other: what ate the underlying reasons 
@@ -693,7 +708,7 @@ gr_m=[nanmean(par(g1)) nanmean(par(g2)) nanmean(par(g3))];
 gr_sem=[nanstd(par(g1))/sqrt(sum(~isnan(par(g1)))) nanstd(par(g2))/sqrt(sum(~isnan(par(g2))))...
  nanstd(par(g3))/sqrt(sum(~isnan(par(g3))))];
 hold on;
-b=bar(i,gr_m(i));b.FaceColor=color_id{i};
+b2=bar(i,gr_m(i));b2.FaceColor=color_id{i};
 hold on;
 plot(ones(1,length(par(g1))),par(g1),'ko','MarkerEdgeColor',[0.7,0.7,0.7],'MarkerSize',3);
 hold on;
@@ -706,10 +721,19 @@ for i=1:gr_nr
 hold on;
 er=errorbar(i,gr_m(i),gr_sem(i));er.Color = [0 0 0];er.LineWidth=1.5;er.LineStyle = 'none'; hold on;
 end
-hold on;xticks([1 2 3]);xticklabels({'PN','nFS','FS'});set(gca,'FontSize',10);
+hold on;xticks([1 2 3]);xticklabels({'PN','nFS IN','FS IN'});set(gca,'FontSize',10);
 %title('TTX + 4AP');
 ylabel('Max Slope');xtickangle(45);
+%Statistical test 
+tmp=[];
+tmp=par(g3);
+tmp(find(isnan(par(g3))))=[];
+data_slope=[];data_slope=[par(g1) ;par(g2) ;tmp];
+group_id=[];group_id=[ones(length(par(g1)),1); ones(length(par(g2)),1)*2; ones(length(tmp),1)*3];
+[p,tbl,stats]  = kruskalwallis(data_slope',group_id');
+figure;c = multcompare(stats);
 %% Show injected current vs spike frequency
+freq_cutoff=50;
 a=[];a=find(maxsF>freq_cutoff | pv_label==1);
 b=[];b=find(maxsF<freq_cutoff);
 c=[];c=find(maxsF<freq_cutoff | pv_label==1);
@@ -724,6 +748,7 @@ hold on;
      p1=plot(stimvec_in{:,b(i)},spikecount_in{:,b(i)});p1.Color='#A2142F';p1.Color(4)=3/8;
      hold on;set(gca,'box','off');
  end
+
 hold on;
 for i=1:length(spikecount_pyr)
      p1=plot(stimvec_pyr{:,i},spikecount_pyr{:,i},'k', 'MarkerFaceColor','k');p1.Color(4)=3/8;
@@ -736,11 +761,13 @@ e.Color = [0.8500 0.3250 0.0980];e.CapSize = 10;
 hold on;p1=plot(stimvec_pyr{:,end},mean_nfs,'-o','LineWidth',2);p1.Color='#A2142F';
  hold on; e=errorbar(stimvec_pyr{:,end},mean_nfs,sem_nfs);
 e.Color = '#A2142F';e.CapSize = 10;
-hold on;p1=plot(stimvec_pyr{:,end},mean_pyr,'-o','LineWidth',2);p1.Color='k'
+hold on;p1=plot(stimvec_pyr{:,end},mean_pyr,'-o','LineWidth',2);p1.Color='k';
  hold on; e=errorbar(stimvec_pyr{:,end},mean_pyr,sem_pyr);
 e.Color = 'k';e.CapSize = 10;
 xlim([0 500]);
-legend({'FS', 'nFS','PN'});
+% legend({'FS', 'nFS','PN'});
+% legend box off
+
 %% Intrinsic properties
 [rmp_pyr maxsp_pyr rheo_pyr rin_pyr tau_pyr sag_pyr trace_pyr spike_time_pyr] = passive_readout(Ephys,pyr_k);
 [rmp_in maxsp_in rheo_in rin_in tau_in sag_in trace_in spike_time_in] = passive_readout(Ephys,in_k);
@@ -753,33 +780,33 @@ p1=rin_pyr;p2=rin_in;
 par=[];par=[p1 p2(a)]';
 g1=1:length(p1);
 g2=length(p1)+1:length(par);
-[statsout]=dual_boxplot(par,g1,g2,0);
+[statsout_rin]=dual_boxplot(par,g1,g2,0);
 ylabel('Input resistance (mOhm)');set(gca,'FontSize',10);
-xlim([0 3]);xticks([1 2]);xticklabels({'PN','FS'});xtickangle(45);
+xlim([0 3]);xticks([1 2]);xticklabels({'PN','FS IN'});xtickangle(45);
 
 %Rheobase
 p1=rheo_pyr;p2=rheo_in;
 par=[];par=[p1 p2(a)]';
 g1=1:length(p1);
 g2=length(p1)+1:length(par);
-[statsout]=dual_boxplot(par,g1,g2,0);
-xlim([0 3]);ylabel('Threshold current (pA)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});xtickangle(45);
+[statsout_rheo]=dual_boxplot(par,g1,g2,0);
+xlim([0 3]);ylabel('Threshold current (pA)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS IN'});xtickangle(45);
 
 %RMP
 p1=rmp_pyr;p2=rmp_in;
 par=[];par=[p1 p2(a)]';
 g1=1:length(p1);
 g2=length(p1)+1:length(par);
-[statsout]=dual_boxplot(par,g1,g2,0);
-xlim([0 3]);ylabel('RMP (mV)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});xtickangle(45);
+[statsout_rmp]=dual_boxplot(par,g1,g2,0);
+xlim([0 3]);ylabel('RMP (mV)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS IN'});xtickangle(45);
 
 %tau
 p1=tau_pyr;p2=tau_in;
 par=[];par=[p1 p2(a)]';
 g1=1:length(p1);
 g2=length(p1)+1:length(par);
-[statsout]=dual_boxplot(par,g1,g2,0);
-xlim([0 3]);ylabel('Membrane time constant (ms)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});xtickangle(45);
+[statsout_tau]=dual_boxplot(par,g1,g2,0);
+xlim([0 3]);ylabel('Membrane time constant (ms)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS IN'});xtickangle(45);
 %% Active parameters
 %first or second spike: first here: 
 spike_nr=1;
@@ -787,11 +814,13 @@ active_pyr=sp_parameters_pandora(trace_pyr,spike_nr);
 active_in=sp_parameters_pandora(trace_in,spike_nr);
  active_pyr(5,:)=active_pyr(5,:)*2;
 active_in(5,:)=active_in(5,:)*2;
+active_in(15,:)=active_in(15,:)/2;
+active_pyr(15,:)=active_pyr(15,:)/2;
 %% Subplots for active paramaters 
 par1=active_pyr([1 2 3 5 6 7 8 15],:);par2=active_in([1 2 3 5 6 7 8 15],a);
 color_id={[0 0 0],[0.8500 0.3250 0.0980]};
-str={'V_{min}(mV)','V_{peak}(mV)','V_{thresh}(mV)', 'Vslope_{max} (\DeltamV/\Deltams)','V_{half} (mV)','Spike_{amplitude} (mV)',...
-    'AHP_{max}(mV)','Spike_{half width} (ms)'};
+str={'APV_{min}(mV)','APV_{peak}(mV)','APV_{thresh}(mV)', 'APVslope_{max} (\DeltamV/\Deltams)','APV_{half} (mV)','APV_{amplitude} (mV)',...
+    'AHP_{max}(mV)','AP_{half width} (ms)'};
 
 fig3= figure;set(fig3, 'Name', 'Paired comp');set(fig3, 'Position', [200, 500, 400, 500]);set(gcf,'color','w');
 for i=1:size(par1,1)
@@ -819,18 +848,57 @@ set(gca,'FontSize',10)
 [p k]=ranksum(data{:,1},data{:,2});
     statsout(i)=p;
 end
+%% difference between rmp and threshold for PN and FS-IN
+p1=rmp_pyr;
+parcom=[];parcom=[abs(rmp_pyr-par1(3,:))' ;abs(rmp_in(a)-par2(3,:))'];
+g1=1:length(p1);
+g2=length(p1)+1:length(parcom);
+[statsout]=dual_boxplot(parcom,g1,g2,0);
+xlim([0 3]);ylabel('\DeltaRMP - APV_{thresh}');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS IN'});xtickangle(45);
 %% 
-%tau
+
 p1=active_pyr(5,:);p2=active_in(5,:);
 par=[];par=[p1 p2(a)]';
 g1=1:length(p1);
 g2=length(p1)+1:length(par);
 [statsout]=dual_boxplot(par,g1,g2,0);
-xlim([0 3]);ylabel('Vslope_{max} (\DeltamV/\Deltams)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});
+xlim([0 3]);ylabel('APVslope_{max} (\DeltamV/\Deltams)');set(gca,'FontSize',10);xticks([1 2]);xticklabels({'PN','FS'});
 xtickangle(45);
 
+%% 
 
+ Property = ["RMP";"R_{in}";"Tau";"Threshold current";"APV_{min}";"APV_{peak}";"APV_{thresh}";"APVslope_{max}";...
+     "APV_{half}";"APV_{amplitude}";"AHP_{max}";"AP_{half width}"];
+ %active_pyr([1 2 3 5 6 7 8 15],:)
+ PN = [nanmean(rmp_pyr);nanmean(rin_pyr);nanmean(tau_pyr);nanmean(rheo_pyr);nanmean(active_pyr(1,:));nanmean(active_pyr(2,:));...
+     nanmean(active_pyr(3,:));nanmean(active_pyr(5,:));nanmean(active_pyr(6,:));nanmean(active_pyr(7,:));nanmean(active_pyr(8,:));nanmean(active_pyr(15,:))];
 
+ act_idx=[1 2 3 5 6 7 8 15];
+for i=1:length(act_idx)
+    temp3=[];temp3=active_pyr(act_idx(i),:);
+     sem_pyr_all(i)=nanstd(temp3)/sqrt(sum(~isnan(temp3)));
+end
+
+for i=1:length(act_idx)
+    temp3=[];temp3=active_in(act_idx(i),a);
+     sem_in_all(i)=nanstd(temp3)/sqrt(sum(~isnan(temp3)));
+end
+
+ SEM_PN=[nanstd(rmp_pyr)/sqrt(sum(~isnan(rmp_pyr)));nanstd(rin_pyr)/sqrt(sum(~isnan(rin_pyr)))...
+     ;nanstd(tau_pyr)/sqrt(sum(~isnan(tau_pyr)));nanstd(rheo_pyr)/sqrt(sum(~isnan(rheo_pyr)));sem_pyr_all'];
+
+ FS_IN = [nanmean(rmp_in(a));nanmean(rin_in(a));nanmean(tau_in(a));nanmean(rheo_in(a));nanmean(active_in(1,a));nanmean(active_in(2,a));...
+     nanmean(active_in(3,a));nanmean(active_in(5,a));nanmean(active_in(6,a));nanmean(active_in(7,a));nanmean(active_in(8,a));nanmean(active_in(15,a))];
+ 
+  SEM_IN=[nanstd(rmp_in(a))/sqrt(sum(~isnan(rmp_in(a))));nanstd(rin_in(a))/sqrt(sum(~isnan(rin_in(a))))...
+     ;nanstd(tau_in(a))/sqrt(sum(~isnan(tau_in(a))));nanstd(rheo_in(a))/sqrt(sum(~isnan(rheo_in(a))));sem_in_all'];
+
+ 
+ pValue = [statsout_rmp;statsout_rin;statsout_tau;statsout_rheo;statsout'];
+
+% 
+
+ intrprop = table(Property,PN,SEM_PN,FS_IN,SEM_IN,pValue );
 
 
 
@@ -853,7 +921,7 @@ hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c
 end
 ylim([ov_min-10 ov_max]);title('Cre+','Color','m');
 %CRE OFF
-cnr=4;%210907SW001
+cnr=7;%210907SW001
 temp=[];temp=find(pyr_cs_creoff==1);
 subplot(1,2,2);
 if max(Ephys(temp(cnr)).sub_traces_high(range,2))>max(Ephys(temp(cnr)).sub_traces_high(range,1))
@@ -866,10 +934,10 @@ hold on;plot([0.15*sr 0.15*sr],[ov_max ov_max],'Marker','v','MarkerFaceColor','c
 end
 ylim([ov_min-10 ov_max]);title('Cre-','Color','k');
 %% Paired comparison EPSC IPSC using the first high frequency pulse for Cre on and Cre off Supp figure b) 
-[epsc_on_train ipsc_on_train e_i_ratio_on_train] = readout_amp(Ephys,cre_on_cs ,2,2);
-[epsc_off_train ipsc_off_train e_i_ratio_off_train] = readout_amp(Ephys,cre_off_cs ,2,2);
-[epsc_on_traink tr trtt] = readout_amp(Ephys,cre_on_k ,2,1);
-[epsc_off_traink trr trtttt] = readout_amp(Ephys,cre_off_k ,2,1);
+[epsc_on_train ipsc_on_train e_i_ratio_on_train] = readout_amp(Ephys,cre_on_cs ,2,2,1,2);
+[epsc_off_train ipsc_off_train e_i_ratio_off_train] = readout_amp(Ephys,cre_off_cs ,2,2,1,2);
+[epsc_on_traink tr trtt] = readout_amp(Ephys,cre_on_k ,2,1,1,2);
+[epsc_off_traink trr trtttt] = readout_amp(Ephys,cre_off_k ,2,1,1,2);
 % only using pairs
 cl={'m','k'};
 data=[];data=[[epsc_on_train epsc_on_traink]' [epsc_off_train epsc_off_traink]'];
