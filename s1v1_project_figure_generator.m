@@ -5,6 +5,9 @@ load(char(folder_list));
 %sampling rate
 srF=20;
 sr=20000;
+%folder where to save figures
+save_folder='C:\Users\simonw\S1-V1 interaction Dropbox\Tracing\ManuskriptMT\Revision\review_optophysiology';
+
 %% Readout indices of different cells using cell selecter function 
 
 %get all excitatory cells with EPSC/IPSC L2/3 with no TTX 4AP
@@ -173,7 +176,7 @@ t_ein=[t_ex_sub' t_in_sub'];
 [gh gm]=find(isnan(t_ein));
 t_ein(unique(gh),:)=[];
 cl={'r','b'};
-data=[];data=t_ein;;
+data=[];data=t_ein;
 paired_plot_box(data,cl);
 xticklabels({'EX','IN'});ylabel('Onset Latency (ms)');set(gca,'FontSize',10);
 %statistics 
@@ -182,6 +185,10 @@ kstest(t_ex_sub');
 kstest(t_in_sub');
 %pvalue of paired signrank test:  4.8828e-04
 [p1]=signrank(t_ein(:,1),t_ein(:,2));
+%for reviewer 3
+nanmean(t_ein(:,2))
+nanstd(t_ein(:,2))/sqrt(length(t_ein(:,2)))
+
 %% %% TTX modulation index for PN ; not happy with readout; double check 
 temp=[];temp=find(pyr_washin==1);ttx_ipsc=[];ttx_epsc=[];
 
@@ -190,7 +197,7 @@ ttx_ipsc=[max(abs(Ephys(temp(1)).high_p(1:2,2))) max(abs(Ephys(temp(1)).high_p(1
   max(abs(Ephys(temp(3)).high_p(1:2,2))) max(abs(Ephys(temp(3)).high_p(1:2,3)));...
    max(abs(Ephys(temp(4)).high_p(1:2,2))) max(abs(Ephys(temp(4)).high_p(1:2,4)))];
 
-ttx_epsc=[max(abs(Ephys(temp(1)).high_n(1:2,1))) max(abs(Ephys(temp(1)).high_n(1:2,4)));...
+ttx_epsc=[max(abs(Ephys(temp(1)).high_n(1:2,1)))/ max(abs(Ephys(temp(1)).high_n(1:2,4)));...
     max(abs(Ephys(temp(2)).high_n(1:2,1))) max(abs(Ephys(temp(2)).high_n(1:2,4)));...
   max(abs(Ephys(temp(3)).high_n(1:2,1))) max(abs(Ephys(temp(3)).high_n(1:2,4)));...
    max(abs(Ephys(temp(4)).high_n(1:2,1))) max(abs(Ephys(temp(4)).high_n(1:2,3)))];
@@ -208,13 +215,10 @@ paired_plot_box(data,cl);
 xticklabels({'before','TTX + 4AP'});ylabel('EPSC amplitude (pA)');set(gca,'FontSize',10);
 xtickangle(45); set(gca,'FontSize',10);
 yticks([0:100:300]);
-%% TTX Modulation index (not used at moment)
-% par=[(ttx_ipsc(:,2)-ttx_ipsc(:,1))./(ttx_ipsc(:,2)+ttx_ipsc(:,1)); (ttx_epsc(:,2)-ttx_epsc(:,1))./(ttx_epsc(:,2)+ttx_epsc(:,1))]
-% s1=[1:4];s2=[5:8]
-% [statsout]=dual_barplot(par,s1,s2,2);xticks([1:1:2]);hold on;
-% xticklabels({'IPSC' ,'EPSC'});ylabel('TTX modulation index');set(gca,'FontSize',10);xtickangle(45);
+
 %% Show example IPSC TTX before after 
 temp=[];temp=find(pyr_washin==1);
+%before reviews
 cnr=3;
 ov_min=-20;ov_max=300;
 start=4000;
@@ -222,15 +226,46 @@ endp=8000;
 fig4=figure;set(fig4, 'Position', [200, 800, 200, 200]);set(gcf,'color','w');
 subplot(1,1,1)
 plot(Ephys(temp(cnr)).sub_traces_high(start:endp,3),'Color','k','LineWidth',1.5);set(gca,'box','off');
-hold on;plot(Ephys(temp(cnr)).sub_traces_highf(start:endp,2),'Color','b','LineWidth',1.5);set(gca,'box','off');
+hold on;plot(Ephys(temp(cnr)).sub_traces_high(start:endp,2),'Color','b','LineWidth',1.5);set(gca,'box','off');
 hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
-text(1500,-150,'TTX + 4AP');hold on;text(1500,285,'IPSC before','Color','b');
-%axis off; 
-set(gca,'FontSize',10);
+text(1500,-150,'TTX + 4AP');hold on;text(1500,285,'IPSC before','Color','b'); set(gca,'FontSize',10);
+%% After reviews
+temp=[];temp=find(pyr_washin==1);
+cnr=1;
+ov_min=-20;ov_max=300;
+start=4000;
+endp=8000;
+fig4=figure;set(fig4, 'Position', [200, 800, 200, 200]);set(gcf,'color','w');
+subplot(1,1,1)
+plot(Ephys(temp(cnr)).sub_traces_high(start:endp,6),'Color','k','LineWidth',1.5);set(gca,'box','off');
+hold on;plot(Ephys(temp(cnr)).sub_traces_high(start:endp,2),'Color','b','LineWidth',1.5);set(gca,'box','off');
+hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+%% 
+
+text(1300,-40,'TTX + 4AP (0 mV)');hold on;text(1300,285,'IPSC before (0 mV)','Color','b'); set(gca,'FontSize',10);
+line([-30 470], [-30 -30], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
+line([-30 -30], [-30 20], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
+ax1 = gca;                  
+ax1.YAxis.Visible = 'off';ax1.XAxis.Visible = 'off';ax1.LineWidth=1;hold on;xticks([]);
+%% save as pdf 
+cd(save_folder);saveas(gcf, 'IPSCexampleTTX_cell13.pdf');
+%% 
+temp=[];temp=find(pyr_washin==1);
+cnr=1;
+ov_min=-20;ov_max=300;
+start=4000;
+endp=8000;
+fig4=figure;set(fig4, 'Position', [200, 800, 200, 200]);set(gcf,'color','w');
+subplot(1,1,1)
+plot(Ephys(temp(cnr)).sub_traces_train(start:endp,4),'Color','k','LineWidth',1.5);set(gca,'box','off');
+hold on;plot(Ephys(temp(cnr)).sub_traces_train(start:endp,3),'Color','r','LineWidth',1.5);set(gca,'box','off');
+hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+text(1500,-150,'TTX + 4AP');hold on;text(1500,285,'IPSC before','Color','b'); set(gca,'FontSize',10);
 % subplot(1,2,2)
 % plot(Ephys(temp(cnr)).sub_traces_high(start:endp,4),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
 % hold on;plot(Ephys(temp(cnr)).sub_traces_highf(start:endp,1),'Color','r','LineWidth',1.2);set(gca,'box','off');
 % hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+
  %% E/I ration alternative; just show middle frequency one with median 
 % sig_elong =[];sig_ehf = []; sig_ehf2=[];
 %  sig_elong+sig_ehf+sig_ehf2
@@ -273,7 +308,7 @@ xticks([1:1:3]);ylabel('E / I ratio');xticklabels({'1 Hz','5 Hz','10 Hz'});xtick
 epsp_pyr=[];epsp_in=[];
 [epsp_pyr] = readout_amp_epsp(Ephys,pyr_k ,2,sr);
 [epsp_in] = readout_amp_epsp(Ephys,in_k ,2,sr);
-% 
+
 % epsp_pyr_long=[];epsp_in_long=[];
 % [epsp_pyr_long] = readout_amp_epsp(Ephys,pyr_k ,1,sr);
 % [epsp_in_long] = readout_amp_epsp(Ephys,in_k ,1,sr);
@@ -353,7 +388,8 @@ plot(Ephys(temp(cnr)).sub_traces_high(range,1),'Color','#A2142F','LineWidth',1.3
 ylim([ov_min-10 ov_max]);title('nFS IN','Color','#A2142F');
 axis off;
 
-cnr=8;%
+%8 is in the paper, 19 is good example
+cnr=9;%
 ov_min=-5;ov_max=100;
 temp=[];temp=find(in_k==1);
 subplot(3,1,3)
@@ -362,6 +398,49 @@ plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color',[0.8500 0.3250 0.0980],'L
 %end
 ylim([ov_min-10 ov_max]);title('FS IN','Color',[0.8500 0.3250 0.0980]);
 %axis off;
+%% REVIEWER nr 3, spike latencies questions 
+temp=[];temp=find(in_k==1);
+spike_temp=[8 9 10 15 16 19];trace_temp=[2 1 2 2 1 2];
+for i=1:length(spike_temp)
+    trace_pvs1(i,:)=Ephys(temp(spike_temp(i))).sub_traces_high(:,trace_temp(i));
+end
+for i=1:length(spike_temp)
+    trace_pvs2(i,:)=Ephys(temp(spike_temp(i))).sub_traces_highf(:,trace_temp(i));
+end
+for i=1:length(spike_temp)
+    trace_pvs3(i,:)=Ephys(temp(spike_temp(i))).sub_traces_train(:,trace_temp(i));
+end
+stdfac=10;
+time_pv=[];pktime_pv=[];
+for i=1:size(trace_pvs,1)
+    [time_pv1(i) pktime_pv1(i)]=time_of_resp(trace_pvs1(i,:),1:5000,5001:5500,stdfac); 
+end
+for i=1:size(trace_pvs,1)
+    [time_pv2(i) pktime_pv2(i)]=time_of_resp(trace_pvs2(i,:),1:5000,5001:5500,stdfac); 
+end
+for i=1:size(trace_pvs,1)
+    [time_pv3(i) pktime_pv3(i)]=time_of_resp(trace_pvs3(i,:),1:5000,5001:5500,stdfac); 
+end
+pktime_allstim=[pktime_pv1/sr*1000; pktime_pv2/sr*1000  ;pktime_pv3/sr*1000];
+mean_sp_pvtimes=nanmean(min(pktime_allstim));
+sem_sp_pvtimes=nanstd(min(pktime_allstim))/sqrt(length(min(pktime_allstim)));
+%% Plot spikes with peak times
+range=[];range=4800:5400
+fig4=figure;set(fig4, 'Position', [200, 200, 230, 300]);set(gcf,'color','w');
+plot(Ephys(temp(8)).sub_traces_train(range,2),'Color',[0.1 0.1 0.1],'LineWidth',1.3);hold on;scatter(min(pktime_allstim(:,1))*sr/1000+200,100,30,'v','filled','MarkerEdgeColor',[1 1 1],'MarkerFaceColor',[0.1 0.1 0.1]);
+plot(Ephys(temp(9)).sub_traces_high(range,1),'Color',[0.2 0.2 0.2],'LineWidth',1.3);hold on;scatter(min(pktime_allstim(:,2))*sr/1000+200,100,30,'v','filled','MarkerEdgeColor',[1 1 1],'MarkerFaceColor',[0.2 0.2 0.2]);
+plot(Ephys(temp(10)).sub_traces_highf(range,2),'Color',[0.4 0.4 0.4],'LineWidth',1.3);hold on;scatter(min(pktime_allstim(:,3))*sr/1000+200,100,30,'v','filled','MarkerEdgeColor',[1 1 1],'MarkerFaceColor',[0.4 0.4 0.4]);
+plot(Ephys(temp(15)).sub_traces_high(range,2),'Color',[0.55 0.55 0.55],'LineWidth',1.3);hold on;scatter(min(pktime_allstim(:,4))*sr/1000+200,100,30,'v','filled','MarkerEdgeColor',[1 1 1],'MarkerFaceColor',[0.55 0.55 0.55]);
+plot(Ephys(temp(16)).sub_traces_train(range,1),'Color',[0.7 0.7 0.7],'LineWidth',1.3);hold on;scatter(min(pktime_allstim(:,5))*sr/1000+200,100,30,'v','filled','MarkerEdgeColor',[1 1 1],'MarkerFaceColor',[0.7 0.7 0.7]);
+plot(Ephys(temp(19)).sub_traces_train(range,2),'Color',[0.8 0.8 0.8],'LineWidth',1.3);hold on;scatter(min(pktime_allstim(:,6))*sr/1000+200,100,30,'v','filled','MarkerEdgeColor',[1 1 1],'MarkerFaceColor',[0.8 0.8 0.8]);
+set(gca,'box','off');
+line([200, 200], get(gca, 'ylim'), 'color', ([0 191 255]/256), 'linestyle', ':','LineWidth',1);set(gca,'FontSize',12);hold on;
+line([500 600], [-20 -20], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
+line([-15 -15], [-20 -10], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
+ax1 = gca;                  
+ax1.YAxis.Visible = 'off';ax1.XAxis.Visible = 'off';ax1.LineWidth=1;hold on;xticks([]);
+%% save as pdf 
+cd(save_folder);saveas(gcf, 'spike_latencies_FSIN.pdf');
 %% showing EPSPs across three gropus
 %using a cutoff of 50 Hz
 freq_cutoff=50;
@@ -898,7 +977,7 @@ end
 
 % 
 
- intrprop = table(Property,PN,SEM_PN,FS_IN,SEM_IN,pValue );
+ intrprop = table(Property,PN,SEM_PN,FS_IN,SEM_IN,pValue);
 
 
 
