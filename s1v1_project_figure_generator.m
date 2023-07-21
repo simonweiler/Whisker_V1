@@ -197,7 +197,7 @@ ttx_ipsc=[max(abs(Ephys(temp(1)).high_p(1:2,2))) max(abs(Ephys(temp(1)).high_p(1
   max(abs(Ephys(temp(3)).high_p(1:2,2))) max(abs(Ephys(temp(3)).high_p(1:2,3)));...
    max(abs(Ephys(temp(4)).high_p(1:2,2))) max(abs(Ephys(temp(4)).high_p(1:2,4)))];
 
-ttx_epsc=[max(abs(Ephys(temp(1)).high_n(1:2,1)))/ max(abs(Ephys(temp(1)).high_n(1:2,4)));...
+ttx_epsc=[max(abs(Ephys(temp(1)).high_n(1:2,1))) max(abs(Ephys(temp(1)).high_n(1:2,4)));...
     max(abs(Ephys(temp(2)).high_n(1:2,1))) max(abs(Ephys(temp(2)).high_n(1:2,4)));...
   max(abs(Ephys(temp(3)).high_n(1:2,1))) max(abs(Ephys(temp(3)).high_n(1:2,4)));...
    max(abs(Ephys(temp(4)).high_n(1:2,1))) max(abs(Ephys(temp(4)).high_n(1:2,3)))];
@@ -242,29 +242,29 @@ hold on;plot(Ephys(temp(cnr)).sub_traces_high(start:endp,2),'Color','b','LineWid
 hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 %% 
 
-text(1300,-40,'TTX + 4AP (0 mV)');hold on;text(1300,285,'IPSC before (0 mV)','Color','b'); set(gca,'FontSize',10);
-line([-30 470], [-30 -30], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
-line([-30 -30], [-30 20], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
-ax1 = gca;                  
-ax1.YAxis.Visible = 'off';ax1.XAxis.Visible = 'off';ax1.LineWidth=1;hold on;xticks([]);
+% text(1300,-40,'TTX + 4AP (0 mV)');hold on;text(1300,285,'IPSC before (0 mV)','Color','b'); set(gca,'FontSize',10);
+% line([-30 470], [-30 -30], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
+% line([-30 -30], [-30 20], 'color', 'k', 'linestyle', '-','LineWidth',1);hold on;
+% ax1 = gca;                  
+% ax1.YAxis.Visible = 'off';ax1.XAxis.Visible = 'off';ax1.LineWidth=1;hold on;xticks([]);
 %% save as pdf 
 cd(save_folder);saveas(gcf, 'IPSCexampleTTX_cell13.pdf');
 %% 
-temp=[];temp=find(pyr_washin==1);
-cnr=1;
-ov_min=-20;ov_max=300;
-start=4000;
-endp=8000;
-fig4=figure;set(fig4, 'Position', [200, 800, 200, 200]);set(gcf,'color','w');
-subplot(1,1,1)
-plot(Ephys(temp(cnr)).sub_traces_train(start:endp,4),'Color','k','LineWidth',1.5);set(gca,'box','off');
-hold on;plot(Ephys(temp(cnr)).sub_traces_train(start:endp,3),'Color','r','LineWidth',1.5);set(gca,'box','off');
-hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
-text(1500,-150,'TTX + 4AP');hold on;text(1500,285,'IPSC before','Color','b'); set(gca,'FontSize',10);
-% subplot(1,2,2)
-% plot(Ephys(temp(cnr)).sub_traces_high(start:endp,4),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
-% hold on;plot(Ephys(temp(cnr)).sub_traces_highf(start:endp,1),'Color','r','LineWidth',1.2);set(gca,'box','off');
+% temp=[];temp=find(pyr_washin==1);
+% cnr=1;
+% ov_min=-20;ov_max=300;
+% start=4000;
+% endp=8000;
+% fig4=figure;set(fig4, 'Position', [200, 800, 200, 200]);set(gcf,'color','w');
+% subplot(1,1,1)
+% plot(Ephys(temp(cnr)).sub_traces_train(start:endp,4),'Color','k','LineWidth',1.5);set(gca,'box','off');
+% hold on;plot(Ephys(temp(cnr)).sub_traces_train(start:endp,3),'Color','r','LineWidth',1.5);set(gca,'box','off');
 % hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
+% text(1500,-150,'TTX + 4AP');hold on;text(1500,285,'IPSC before','Color','b'); set(gca,'FontSize',10);
+% % subplot(1,2,2)
+% % plot(Ephys(temp(cnr)).sub_traces_high(start:endp,4),'Color',[0.5 0.5 0.5],'LineWidth',1.2);set(gca,'box','off');
+% % hold on;plot(Ephys(temp(cnr)).sub_traces_highf(start:endp,1),'Color','r','LineWidth',1.2);set(gca,'box','off');
+% % hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 
  %% E/I ration alternative; just show middle frequency one with median 
 % sig_elong =[];sig_ehf = []; sig_ehf2=[];
@@ -375,7 +375,7 @@ subplot(3,1,1)
 plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color','k','LineWidth',1.3);set(gca,'box','off');
 hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 %end
-ylim([ov_min-10 ov_max]);title('PN','Color','k');
+ylim([ov_min-5 12]);title('PN','Color','k');
 axis off;
 
 cnr=3;%
@@ -385,11 +385,11 @@ subplot(3,1,2)
 plot(Ephys(temp(cnr)).sub_traces_high(range,1),'Color','#A2142F','LineWidth',1.3);set(gca,'box','off');
 %hold on;plot([1000 1000],[ov_max ov_max],'Marker','v','MarkerFaceColor','c','MarkerEdgeColor','c');
 %end
-ylim([ov_min-10 ov_max]);title('nFS IN','Color','#A2142F');
-axis off;
+ylim([ov_min-5 12]);title('nFS IN','Color','#A2142F');
+%axis off;
 
 %8 is in the paper, 19 is good example
-cnr=9;%
+cnr=8;%
 ov_min=-5;ov_max=100;
 temp=[];temp=find(in_k==1);
 subplot(3,1,3)
@@ -398,6 +398,8 @@ plot(Ephys(temp(cnr)).sub_traces_high(range,2),'Color',[0.8500 0.3250 0.0980],'L
 %end
 ylim([ov_min-10 ov_max]);title('FS IN','Color',[0.8500 0.3250 0.0980]);
 %axis off;
+%% 
+cd(save_folder);saveas(gcf, 'examples_current_clamp_celltypes.pdf');
 %% REVIEWER nr 3, spike latencies questions 
 temp=[];temp=find(in_k==1);
 spike_temp=[8 9 10 15 16 19];trace_temp=[2 1 2 2 1 2];
@@ -1131,7 +1133,128 @@ b=bar(2,gr_m(2));b.FaceColor='k';b.FaceAlpha=0.75;
 % hold on;scatter(ones(length(e_i_ratio_pyr_hf2(a3)),1)*3,e_i_ratio_pyr_hf2(a3),7,'o','MarkerEdgeColor',[0.5 0.5 0.5]);
 hold on;er=errorbar(1:2,gr_m,gr_sem);er.Color = [0 0 0];er.LineWidth=1;er.LineStyle = 'none'; hold on;
 xticks([1:1:2]);ylabel('Onset latency (ms)');xticklabels({'Cre+','Cre-'});xtickangle(45);set(gca,'FontSize',10);
+
+%% REVIEW LOW LASER INTENSITIES 
+pn=cell_selecter(Ephys,'label',5,'sol',1,'layer',3,'drugs',2);
+pv=cell_selecter(Ephys,'label',4,'sol',1,'layer',3,'drugs',2);
+
+temp=[];temp=find(pn==1);
+temp2=[];temp2=find(pv==1);
 %% 
+%low intensity ramp, read out for PN and PVs
+%PN
+a1=[];a1=nanmean(Ephys(temp(1)).ladder_p(:,4:end),2);
+a2=[];a2=nanmean(Ephys(temp(2)).ladder_p(:,5:7),2);
+a3=[];a3=nanmean(Ephys(temp(3)).ladder_p(:,1:3),2);
+a4=[];a4=nanmean(Ephys(temp(4)).ladder_p(:,6:10),2);
+a5=[];a5=nanmean(Ephys(temp(5)).ladder_p(:,1:4),2);
+%PV
+b1=[];b1=nanmean(Ephys(temp2(1)).ladder_p(:,1:2),2);
+b2=[];b2=nanmean(Ephys(temp2(2)).ladder_p(:,6:10),2);
+b3=[];b3=nanmean(Ephys(temp2(3)).ladder_p(:,1:3),2);
+b4=[];b4=nanmean(Ephys(temp2(4)).ladder_p(:,5:7),2);
+b5=[];b5=nanmean(Ephys(temp2(5)).ladder_p(:,2:7),2);
+b6=[];b6=nanmean(Ephys(temp2(6)).ladder_p(:,5:8),2);
+
+%combine
+pn_meps=[a1 a2 a3 a4 a5];
+pv_meps=[b1 b2 b3 b4 b5 b6];
+
+
+
+
+%% 
+
+
+fig6= figure;set(fig6, 'Name', 'Review minimal epsps');set(fig6, 'Position', [200, 300, 350, 250]);set(gcf,'color','w');
+for i=1:size(pn_meps,2)
+plot(pn_meps(:,i),'-','Color',[0 0 0 0.3]);
+min_resppn(i)=min(nonzeros(pn_meps(:,i)))
+hold on
+
+end
+hold on;
+
+
+for i=1:size(pv_meps,2)
+plot(pv_meps(:,i),'-','Color',[0.8500 0.3250 0.0980 0.3]);
+min_resppv(i)=min(nonzeros(pv_meps(:,i)))
+hold on
+end
+
+hold on; e1=errorbar(1:11,nanmean(pv_meps,2),nanstd(pv_meps,[],2)/sqrt(length(pv_meps)),'LineWidth',2)
+e1.Color = [0.8500 0.3250 0.0980];e.CapSize = 10;
+hold on; e2=errorbar(1:11,nanmean(pn_meps,2),nanstd(pn_meps,[],2)/sqrt(length(pn_meps)),'LineWidth',2)
+e2.Color = [0 0 0];e.CapSize = 10;
+box off;
+xlabel('473 nm intensity steps');ylabel('Light evoked EPSP amplitude (mV)');set(gca,'FontSize',10);
+xticks([1:1:11]);
+hold off
+legend([e1 e2],{'PV','PN'});legend boxoff
+
+%% 
+
+p1=min_resppn;p2=min_resppv;
+par=[];par=[p1 p2]';
+g1=1:length(p1);
+g2=length(p1)+1:length(par);
+[statsout_rin]=dual_boxplot(par,g1,g2,0);
+xticklabels({'PN',' PV'});xtickangle(45);ylabel('minimal light evoked EPSP (mV)');set(gca,'FontSize',10);
+% fig6= figure;set(fig6, 'Name', 'Review minimal epsps');set(fig6, 'Position', [200, 300, 350, 250]);set(gcf,'color','w');
+% for i=1:size(pn_meps,2)
+% plot(pn_meps(:,i)/max(pn_meps(:,i)),'-','Color',[0 0 0 0.3]);
+% hold on
+% 
+% end
+% hold on;
+% 
+% 
+% for i=1:size(pv_meps,2)
+% plot(pv_meps(:,i)/max(pv_meps(:,i)),'-','Color',[0.8500 0.3250 0.0980 0.3]);
+% hold on
+% end
+% 
+% hold on; e1=errorbar(1:11,nanmean(pv_meps./max(pv_meps),2),nanstd(pv_meps./max(pv_meps),[],2)/sqrt(length(pv_meps)),'LineWidth',2)
+% e1.Color = [0.8500 0.3250 0.0980];e.CapSize = 10;
+% hold on; e2=errorbar(1:11,nanmean(pn_meps./max(pn_meps),2),nanstd(pn_meps./max(pn_meps),[],2)/sqrt(length(pn_meps)),'LineWidth',2)
+% e2.Color = [0 0 0];e.CapSize = 10;
+% box off;
+% xlabel('473 nm intensity steps');ylabel('Normalized amplitude');set(gca,'FontSize',10);
+% xticks([1:1:11]);
+% hold off
+% legend([e1 e2],{'PV','PN'});legend boxoff
+
+
+%% 
+
+hold on;plot(nanmean(Ephys(temp(2)).ladder_p(:,5:7),2),'-or')
+hold on;plot(nanmean(Ephys(temp(3)).ladder_p(:,1:3),2),'-or')
+hold on;plot(nanmean(Ephys(temp(4)).ladder_p(:,6:10),2),'-or')
+hold on;plot(nanmean(Ephys(temp(5)).ladder_p(:,1:4),2),'-or')
+
+hold on;plot(nanmean(Ephys(temp2(1)).ladder_p(:,1:2),2),'-ob')
+hold on;plot(nanmean(Ephys(temp2(2)).ladder_p(:,6:10),2),'-ob')
+hold on;plot(nanmean(Ephys(temp2(3)).ladder_p(:,1:3),2),'-ob')
+hold on;plot(nanmean(Ephys(temp2(4)).ladder_p(:,5:7),2),'-ob')
+hold on;plot(nanmean(Ephys(temp2(5)).ladder_p(:,2:7),2),'-ob')
+hold on;plot(nanmean(Ephys(temp2(6)).ladder_p(:,5:8),2),'-ob')
+
+
+
+% % %high intensity ramp
+% figure;
+% plot(nanmean(Ephys(temp(1)).ladder_p(:,4:end),2),'r')
+% hold on;plot(nanmean(Ephys(temp(2)).ladder_p(:,8:end),2),'r')
+% hold on;plot(nanmean(Ephys(temp(3)).ladder_p(:,4:end),2),'r')
+% 
+% hold on;plot(nanmean(Ephys(temp2(1)).ladder_p(:,3:end),2),'b')
+% hold on;plot(nanmean(Ephys(temp2(2)).ladder_p(:,11:end),2),'b')
+% hold on;plot(nanmean(Ephys(temp2(3)).ladder_p(:,4:end),2),'b')
+% hold on;plot(nanmean(Ephys(temp2(4)).ladder_p(:,8:end),2),'b')
+
+
+
+
 %% Stuff for Vahid
 a=[];a=find(maxsF>50 | pv_label==1);
 b=[];b=find(maxsF<50);
